@@ -8,43 +8,53 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.awt.image.WritableRaster;
 
+import com.grapeshot.halfnes.PPU;
+
 /**
  *
  * @author Andrew
  */
 public abstract class Renderer {
+	private final int frameWidth;
+	/*
+	there's stuff involving this variable that's much uglier
+	than it needs to be because of me not really remembering
+	how abstract classes work
+	 */
+	private final BufferedImage[] images = {null, null, null, null};
+	private int imgIdx = 0;
+	private int clip;
+	private int height;
 
-    int frame_width;
-    /*
-    there's stuff involving this variable that's much uglier
-    than it needs to be because of me not really remembering
-    how abstract classes work
-     */
-    int clip = 8;
-    int height = 240 - 2 * clip;
-    BufferedImage[] imgs = {null, null, null, null};
-    int imgctr = 0;
 
-    protected final void init_images() {
-        for (int i = 0; i < imgs.length; ++i) {
-            imgs[i] = new BufferedImage(frame_width, height, BufferedImage.TYPE_INT_ARGB_PRE);
-        }
-    }
+	public Renderer(int frameWidth)
+	{
+		this.frameWidth = frameWidth;
 
-    public abstract BufferedImage render(int[] nespixels, int[] bgcolors, boolean dotcrawl);
+		setClip(8);
+		for (int i = 0; i < images.length; ++i) {
+			images[i] = new BufferedImage(frameWidth, height, BufferedImage.TYPE_INT_ARGB_PRE);
+		}
+	}
 
-    public void setClip(int i) {
-        //how many lines to clip from top + bottom
-        clip = i;
-        height = 240 - 2 * clip;
-    }
+	public void setClip(int clip)
+	{
+		//how many lines to clip from top + bottom
+		this.clip = clip;
+		height = PPU.HEIGHT - 2 * clip;
+	}
 
-    public BufferedImage getBufferedImage(int[] frame) {
-        final BufferedImage image = imgs[++imgctr % imgs.length];
-        final WritableRaster raster = image.getRaster();
-        final int[] pixels = ((DataBufferInt) raster.getDataBuffer()).getData();
-        System.arraycopy(frame, frame_width * clip, pixels, 0, frame_width * height);
-        return image;
-    }
+	protected BufferedImage getBufferedImage(int[] frame)
+	{
+		final BufferedImage image = images[++imgIdx % images.length];
+		final WritableRaster raster = image.getRaster();
+		final int[] pixels = ((DataBufferInt) raster.getDataBuffer()).getData();
 
+
+		System.arraycopy(frame, frameWidth * clip, pixels, 0, frameWidth * height);
+
+		return image;
+	}
+
+	public abstract BufferedImage render(int[] nespixels, int[] bgcolors, boolean dotcrawl);
 }

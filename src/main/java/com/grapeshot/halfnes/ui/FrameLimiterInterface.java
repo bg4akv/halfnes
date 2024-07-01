@@ -10,9 +10,9 @@ package com.grapeshot.halfnes.ui;
  */
 public interface FrameLimiterInterface {
 
-    public void sleep();
+	public void sleep();
 
-    public void sleepFixed();
-    
-    public void setInterval(long ns);
+	public void sleepFixed();
+	
+	public void setInterval(long ns);
 }

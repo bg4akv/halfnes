@@ -5,6 +5,6 @@ package com.grapeshot.halfnes;
  *
  */
 public interface ProjectInfo {
-    String VERSION = "${project.version}";
-    String URL = "${project.url}";
+	String VERSION = "001";
+	String URL = "";
 }

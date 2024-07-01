@@ -6,14 +6,8 @@ package com.grapeshot.halfnes.mappers;
 
 public class BadMapperException extends Exception {
 
-    public String e;
-
-    public BadMapperException(String e) {
-        this.e = e;
-    }
-
-    @Override
-    public String getMessage() {
-        return e;
-    }
+	public BadMapperException(String msg)
+	{
+		super(msg);
+	}
 }

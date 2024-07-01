@@ -10,11 +10,11 @@ package com.grapeshot.halfnes.ui;
  */
 public interface ControllerInterface {
 
-    public void strobe();
+	public void strobe();
 
-    public void output(final boolean state);
-    
-    public int peekOutput();
+	public void output(final boolean state);
+	
+	public int peekOutput();
 
-    public int getbyte();
+	public int getbyte();
 }

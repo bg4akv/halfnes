@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="HalfNES" default="dist" basedir=".">
+	<description>
+		HalfNES Build File
+	</description>
+
+	<property name="jar.file" value="HalfNES"/>
+	<property name="src.dir" location="src"/>
+	<property name="resources.dir" location="resources"/>
+	<property name="conf.dir" location="conf"/>
+	<property name="lib.dir" location="lib"/>
+	<property name="build.dir" location="build"/>
+	<property name="dist.dir" location="dist/HalfNES"/>
+	<property name="meta-inf.dir" location="META-INF"/>
+	<property name="manifest.file" value="MANIFEST.MF"/>
+	<property name="manifest.path" value="${meta-inf.dir}/${manifest.file}"/>
+	<property name="debuglevel" value="source,lines,vars" />
+
+	<path id="build.classpath">
+		<fileset dir="lib">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp/>
+
+		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${meta-inf.dir}"/>
+		<mkdir dir="${dist.dir}"/>
+	</target>
+
+	<target name="compile" depends="init">
+		<javac srcdir="${src.dir}" destdir="${build.dir}" optimize="true" debug="true" debuglevel="${debuglevel}" includeantruntime="on" encoding="UTF-8">
+			<classpath refid="build.classpath" />
+		</javac>
+	</target>
+
+	<pathconvert property="libs.dependence" pathsep=" ">
+		<mapper>
+			<chainedmapper>
+				<!-- remove absolute path -->
+				<flattenmapper />
+				<!-- add lib/ prefix -->
+				<globmapper from="*" to="lib/*" />
+			</chainedmapper>
+		</mapper>
+		<path>
+			<!-- lib.home contains all jar files, in several subdirectories -->
+			<fileset dir="${lib.dir}">
+				<include name="**/*.jar" />
+			</fileset>
+		</path>
+	</pathconvert>
+
+	<target name="manifest" depends="init" description="generate the manifest">
+		<mkdir dir="${meta-inf.dir}"/>
+		<manifest file="${manifest.path}">
+			<attribute name="Main-Class" value="com.grapeshot.halfnes.halfNES"/>
+		</manifest>
+	</target>
+
+	<target name="dist" depends="clean,manifest,compile" description="generate the distribution">
+
+
+		<copy todir="${build.dir}">
+			<fileset dir="${src.dir}">
+				<include name="*.properties"/>
+			</fileset>
+		</copy>
+
+		<copy todir="${dist.dir}">
+			<fileset dir="${basedir}">
+				<include name="*.sh"/>
+				<include name="*.bat"/>
+				<include name="*.cmd"/>
+				<include name="*.jar"/>
+			</fileset>
+		</copy>
+
+		<jar jarfile="${dist.dir}/${jar.file}.jar" basedir="${build.dir}" manifest="${manifest.path}">
+			<zipgroupfileset dir="${lib.dir}" includes="*.jar"/>
+		</jar>
+	</target>
+
+	<target name="clean">
+		<delete dir="${dist.dir}"/>
+		<delete dir="${meta-inf.dir}"/>
+		<delete dir="${build.dir}"/>
+	</target>
+
+</project>

@@ -39,3 +39,5 @@ proguard4.7
 /.settings/
 .classpath
 .project
+/bin/
+META-INF
