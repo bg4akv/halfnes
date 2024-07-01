@@ -57,7 +57,7 @@ public class MainForm extends JFrame {
 	private BufferStrategy bufferStrategy;
 	private final NES nes;
 	private static final long serialVersionUID = 6411494245530679723L;
-	private final ActionListener actionListener;
+	private ActionListener actionListener;
 	private int screenScaleFactor;
 	private final long[] frameTimes = new long[60];
 	private int frameTimeIdx = 0;
@@ -78,7 +78,55 @@ public class MainForm extends JFrame {
 		nes.setControllers(padController1, padController2);
 		padController1.startEventQueue();
 		padController2.startEventQueue();
+	}
 
+	private synchronized void setRenderOptions()
+	{
+		if (canvas != null) {
+			remove(canvas);
+		}
+
+		screenScaleFactor = PrefsSingleton.getInstance().getInt("screenScaling", 2);
+		smoothScale = PrefsSingleton.getInstance().getBoolean("smoothScaling", false);
+
+		if (PrefsSingleton.getInstance().getBoolean("TVEmulation", false)) {
+			renderer = new NTSCRenderer();
+			NES_WIDTH = 302;
+		} else {
+			renderer = new RGBRenderer();
+			NES_WIDTH = 256;
+		}
+
+		if (PrefsSingleton.getInstance().getInt("region", 0) > 1) {
+			NES_HEIGHT = 240;
+			renderer.setClip(0);
+		} else {
+			NES_HEIGHT = 224;
+			renderer.setClip(8);
+		}
+
+		// Create canvas for painting
+		canvas = new Canvas();
+		canvas.setSize(NES_WIDTH * screenScaleFactor, NES_HEIGHT * screenScaleFactor);
+		canvas.setEnabled(false); //otherwise it steals input events.
+		// Add canvas to game window
+		add(canvas);
+		pack();
+		canvas.createBufferStrategy(2);
+		bufferStrategy = canvas.getBufferStrategy();
+	}
+
+	public void start(String[] args)
+	{
+		if (args == null || args.length < 1 || args[0] == null) {
+			nes.start();
+		} else {
+			nes.run(args[0]);
+		}
+	}
+
+	private synchronized void init()
+	{
 		actionListener = new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e)
@@ -131,59 +179,11 @@ public class MainForm extends JFrame {
 				}
 			}
 		};
-	}
 
-	private synchronized void setRenderOptions()
-	{
-		if (canvas != null) {
-			remove(canvas);
-		}
-
-		screenScaleFactor = PrefsSingleton.getInstance().getInt("screenScaling", 2);
-		smoothScale = PrefsSingleton.getInstance().getBoolean("smoothScaling", false);
-
-		if (PrefsSingleton.getInstance().getBoolean("TVEmulation", false)) {
-			renderer = new NTSCRenderer();
-			NES_WIDTH = 302;
-		} else {
-			renderer = new RGBRenderer();
-			NES_WIDTH = 256;
-		}
-
-		if (PrefsSingleton.getInstance().getInt("region", 0) > 1) {
-			NES_HEIGHT = 240;
-			renderer.setClip(0);
-		} else {
-			NES_HEIGHT = 224;
-			renderer.setClip(8);
-		}
-
-		// Create canvas for painting
-		canvas = new Canvas();
-		canvas.setSize(NES_WIDTH * screenScaleFactor, NES_HEIGHT * screenScaleFactor);
-		canvas.setEnabled(false); //otherwise it steals input events.
-		// Add canvas to game window
-		add(canvas);
-		pack();
-		canvas.createBufferStrategy(2);
-		bufferStrategy = canvas.getBufferStrategy();
-	}
-
-	public void start(String[] args)
-	{
-		if (args == null || args.length < 1 || args[0] == null) {
-			nes.start();
-		} else {
-			nes.run(args[0]);
-		}
-	}
-
-	private synchronized void init()
-	{
 		//construct window
 		setTitle("HalfNES " + NES.VERSION);
 		setResizable(false);
-		buildMenus();
+		buildMenus(actionListener);
 		setRenderOptions();
 
 		getRootPane().registerKeyboardAction(actionListener, "Escape",
@@ -272,8 +272,12 @@ public class MainForm extends JFrame {
 		});
 	}
 
-	public void buildMenus()
+	private void buildMenus(ActionListener actionListener)
 	{
+		if (actionListener == null) {
+			return;
+		}
+
 		JMenuBar menuBar = new JMenuBar();
 
 		JMenu menu = new JMenu("File");
@@ -503,7 +507,7 @@ public class MainForm extends JFrame {
 			setUndecorated(false);
 			setVisible(true);
 			inFullScreen = false;
-			buildMenus();
+			buildMenus(actionListener);
 			// nes.resume();
 		} else { // enable
 			setJMenuBar(null);
@@ -591,10 +595,7 @@ public class MainForm extends JFrame {
 						height,
 						null);
 			} else {
-				graphics.drawImage(frame, 0, 0,
-						scrnwidth,
-						scrnheight,
-						null);
+				graphics.drawImage(frame, 0, 0, scrnwidth, scrnheight, null);
 			}
 			graphics.setColor(Color.DARK_GRAY);
 			graphics.drawString(getTitle(), 16, 16);
