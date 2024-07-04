@@ -660,7 +660,7 @@ public final class CPU {
 		case 0xf2:
 			System.err.println("KIL - CPU locked");
 			flushLog();
-			ram.apu.nes.runEmulation = false;
+			ram.apu.nes.pause();
 			break;
 		// LAS (unofficial)
 		case 0xbb:

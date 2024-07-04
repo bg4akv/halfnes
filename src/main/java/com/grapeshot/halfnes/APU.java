@@ -106,7 +106,12 @@ public class APU {
 		if (audioOutput != null) {
 			audioOutput.destroy();
 		}
-		audioOutput = new SwingAudioImpl(nes, samplerate, tvtype);
+		try {
+			audioOutput = new SwingAudioImpl(samplerate, tvtype);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		if (PrefsSingleton.getInstance().getBoolean("showScope", false)) {
 			audioOutput = new Oscilloscope(audioOutput);
 		}
@@ -142,7 +147,8 @@ public class APU {
 //	   ai = new Reverberator(ai, 20382,0.2,0.3,0.9);
 	}
 
-	public boolean bufferHasLessThan(int samples) {
+	public boolean bufferHasLessThan(int samples)
+	{
 		return audioOutput.bufferHasLessThan(samples);
 	}
 
@@ -170,10 +176,10 @@ public class APU {
 				return returnval;
 			case 0x16:
 				nes.getcontroller1().strobe();
-				return nes.getcontroller1().getbyte() | 0x40;
+				return nes.getcontroller1().getByte() | 0x40;
 			case 0x17:
 				nes.getcontroller2().strobe();
-				return nes.getcontroller2().getbyte() | 0x40;
+				return nes.getcontroller2().getByte() | 0x40;
 			default:
 				return 0x40; //open bus
 		}

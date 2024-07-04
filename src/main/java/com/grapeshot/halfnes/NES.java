@@ -11,9 +11,8 @@ import javafx.application.Platform;
 import com.grapeshot.halfnes.cheats.ActionReplay;
 import com.grapeshot.halfnes.mappers.BadMapperException;
 import com.grapeshot.halfnes.mappers.Mapper;
-import com.grapeshot.halfnes.ui.ControllerInterface;
-import com.grapeshot.halfnes.ui.FrameLimiterImpl;
-import com.grapeshot.halfnes.ui.FrameLimiterInterface;
+import com.grapeshot.halfnes.ui.ControllerKeyListener;
+import com.grapeshot.halfnes.ui.FrameLimiter;
 import com.grapeshot.halfnes.ui.MainForm;
 import com.grapeshot.halfnes.util.ThreadLoop;
 
@@ -22,43 +21,42 @@ public class NES {
 	public static final String VERSION = "001";
 	public static final String URL = "";
 
+	private final MainForm mainForm;
 	private Mapper mapper;
 	private APU apu;
 	private CPU cpu;
 	private CPUAddrSpace cpuram;
 	private PPU ppu;
-	private MainForm gui;
-	private ControllerInterface controller1, controller2;
-	public boolean runEmulation = false;
-	private boolean dontSleep = false;
+	private ControllerKeyListener controller1, controller2;
+	private boolean runEmulation = false;
+	private boolean needSleep = true;
 	//private boolean shutdown = false;
 	public long frameStartTime, frameCount, frameDoneTime;
 	private boolean frameLimiterOn = true;
 	private String curRomPath;
-	private final FrameLimiterInterface limiter = new FrameLimiterImpl(this, 16639267);
+	private final FrameLimiter limiter = new FrameLimiter(this, 16639267);
 	// Pro Action Replay device
 	private ActionReplay actionReplay;
 
 	private final ThreadLoop loop;
 
 
-	public NES(MainForm gui)
+	public NES(final MainForm mainForm)
 	{
-		this.gui = gui;
-
+		this.mainForm = mainForm;
 		loop = new ThreadLoop(() -> {
 			if (runEmulation) {
 				frameStartTime = System.nanoTime();
 				actionReplay.applyPatches();
 				runFrame();
-				if (frameLimiterOn && !dontSleep) {
+				if (frameLimiterOn && needSleep) {
 					limiter.sleep();
 				}
 				frameDoneTime = System.nanoTime() - frameStartTime;
 			} else {
 				limiter.sleepFixed();
 				if (ppu != null && frameCount > 1) {
-					gui.drawImage();
+					//mainForm.drawImage();
 				}
 			}
 		}, 0);
@@ -85,22 +83,14 @@ public class NES {
 
 	public void start()
 	{
-		//while (!shutdown) {
-		//	if (runEmulation) {
-		//		frameStartTime = System.nanoTime();
-		//		actionReplay.applyPatches();
-		//		runFrame();
-		//		if (frameLimiterOn && !dontSleep) {
-		//			limiter.sleep();
-		//		}
-		//		frameDoneTime = System.nanoTime() - frameStartTime;
-		//	} else {
-		//		limiter.sleepFixed();
-		//		if (ppu != null && frameCount > 1) {
-		//			gui.render();
-		//		}
-		//	}
-		//}
+		if (controller1 != null) {
+			controller1.start();
+		}
+
+		if (controller2 != null) {
+			controller2.start();
+		}
+
 		loop.start();
 	}
 
@@ -110,7 +100,7 @@ public class NES {
 		ppu.runFrame();
 
 		//do end of frame stuff
-		dontSleep = apu.bufferHasLessThan(1000);
+		needSleep = !apu.bufferHasLessThan(1000);
 		//if the audio buffer is completely drained, don't sleep for this frame
 		//this is to prevent the emulator from getting stuck sleeping too much
 		//on a slow system or when the audio buffer runs dry.
@@ -123,7 +113,7 @@ public class NES {
 		//	System.err.println("log on");
 		//}
 		//render the frame
-		ppu.renderFrame(gui);
+		ppu.renderFrame(mainForm);
 		if ((frameCount & 0x07ff) == 0) {
 			//save sram every 30 seconds or so
 			saveSRAM(true);
@@ -132,7 +122,7 @@ public class NES {
 		//System.err.println(framecount);
 	}
 
-	public void setControllers(ControllerInterface controller1, ControllerInterface controller2)
+	public void setControllers(ControllerKeyListener controller1, ControllerKeyListener controller2)
 	{
 		this.controller1 = controller1;
 		this.controller2 = controller2;
@@ -143,21 +133,19 @@ public class NES {
 		frameLimiterOn = !frameLimiterOn;
 	}
 
-	public synchronized void loadROM(final String filename)
+	public synchronized void loadROM(final String filename) throws Exception
 	{
 		loadROM(filename, null);
 	}
 
-	private synchronized void loadROM(final String filename, Integer initialPC)
+	private synchronized void loadROM(final String filename, Integer initialPC) throws Exception
 	{
 		runEmulation = false;
 		if (!FileUtils.exists(filename)
 			|| (!FileUtils.getExtension(filename).equalsIgnoreCase(".nes")
 				&& !FileUtils.getExtension(filename).equalsIgnoreCase(".nsf"))) {
-
-			gui.messageBox("Could not load file:\nFile " + filename + "\n"
+			throw new Exception("Could not load file:\nFile " + filename + "\n"
 					+ "does not exist or is not a valid NES game.");
-			return;
 		}
 
 		Mapper mapper;
@@ -168,14 +156,11 @@ public class NES {
 			mapper.setLoader(loader);
 			mapper.loadrom();
 		} catch (BadMapperException e) {
-			gui.messageBox("Error Loading File: ROM is"
+			throw new Exception("Error Loading File: ROM is"
 					+ " corrupted or uses an unsupported mapper.\n" + e.getMessage());
-			return;
 		} catch (Exception e) {
-			gui.messageBox("Error Loading File: ROM is"
+			throw new Exception("Error Loading File: ROM is"
 					+ " corrupted or uses an unsupported mapper.\n" + e.toString() + e.getMessage());
-			e.printStackTrace();
-			return;
 		}
 
 		if (apu != null) {
@@ -247,6 +232,13 @@ public class NES {
 		//shutdown = true;
 		loop.stop();
 		Platform.exit();
+
+		if (controller1 != null) {
+			controller1.stop();
+		}
+		if (controller2 != null) {
+			controller2.stop();
+		}
 	}
 
 	public synchronized void reset()
@@ -264,7 +256,7 @@ public class NES {
 		frameCount = 0;
 	}
 
-	public synchronized void reloadROM()
+	public synchronized void reloadROM() throws Exception
 	{
 		loadROM(curRomPath);
 	}
@@ -318,19 +310,12 @@ public class NES {
 		return frameLimiterOn;
 	}
 
-	public void messageBox(final String string)
-	{
-		if (gui != null) {
-			gui.messageBox(string);
-		}
-	}
-
-	public ControllerInterface getcontroller1()
+	public ControllerKeyListener getcontroller1()
 	{
 		return controller1;
 	}
 
-	public ControllerInterface getcontroller2()
+	public ControllerKeyListener getcontroller2()
 	{
 		return controller2;
 	}

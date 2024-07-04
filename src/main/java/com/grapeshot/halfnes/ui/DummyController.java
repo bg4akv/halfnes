@@ -4,8 +4,6 @@
  */
 package com.grapeshot.halfnes.ui;
 
-import java.util.HashMap;
-
 import static com.grapeshot.halfnes.utils.BIT0;
 import static com.grapeshot.halfnes.utils.BIT1;
 import static com.grapeshot.halfnes.utils.BIT2;
@@ -15,10 +13,12 @@ import static com.grapeshot.halfnes.utils.BIT5;
 import static com.grapeshot.halfnes.utils.BIT6;
 import static com.grapeshot.halfnes.utils.BIT7;
 
+import java.util.HashMap;
+
 /**
  * @author Andrew
  */
-public class DummyController implements ControllerInterface {
+public class DummyController {
 
 	//i wrote this to test a bug in the menu of one game.
 	//if using this again, maybe a parser and some RLE would be appropriate?
@@ -67,14 +67,12 @@ public class DummyController implements ControllerInterface {
 		m.put('S', BIT3); // Start
 	}
 
-	@Override
 	public void strobe() {
 		//shifts a byte out
 		outbyte = latchbyte & 1;
 		latchbyte = ((latchbyte >> 1) | 0x100);
 	}
 
-	@Override
 	public void output(final boolean state) {
 		if (frame < input.length) {
 			latchbyte = m.get(input[frame]);
@@ -84,13 +82,11 @@ public class DummyController implements ControllerInterface {
 		++frame;
 	}
 
-	@Override
 	public int peekOutput() {
 		return latchbyte;
 	}
 
-	@Override
-	public int getbyte() {
+	public int getByte() {
 		return outbyte;
 	}
 }

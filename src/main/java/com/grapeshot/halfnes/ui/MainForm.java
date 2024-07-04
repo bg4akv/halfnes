@@ -33,12 +33,16 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JRootPane;
 import javax.swing.KeyStroke;
 import javax.swing.TransferHandler;
 
@@ -53,11 +57,29 @@ import com.grapeshot.halfnes.video.Renderer;
 
 
 public class MainForm extends JFrame {
-	private Canvas canvas;
-	private BufferStrategy bufferStrategy;
+	private static final String CMD_QUIT = "Quit";
+	private static final String CMD_RESET = "Reset";
+	private static final String CMD_HARD_RESET = "Hard Reset";
+	private static final String CMD_PAUSE = "Pause";
+	private static final String CMD_RESUME = "Resume";
+	private static final String CMD_PREF = "Preferences";
+	private static final String CMD_FAST_FORWARD = "Fast Forward";
+	private static final String CMD_ABOUT = "About";
+	private static final String CMD_ROM_INFO = "ROM Info";
+	private static final String CMD_OPEN_ROM = "Open ROM";
+	private static final String CMD_TOGGLE_FULL_SCREEN = "Toggle Fullscreen";
+	private static final String CMD_FRAME_ADVANCE = "Frame Advance";
+	private static final String CMD_ESCAPE = "Escape";
+	private static final String CMD_CONTROLLER_SETTINGS = "Controller Settings";
+	private static final String CMD_CHEAT_CODES = "Cheat Codes";
+
+
 	private final NES nes;
-	private static final long serialVersionUID = 6411494245530679723L;
+	private final ControllerKeyListener padController1, padController2;
 	private ActionListener actionListener;
+
+	private Canvas canvas;
+
 	private int screenScaleFactor;
 	private final long[] frameTimes = new long[60];
 	private int frameTimeIdx = 0;
@@ -65,19 +87,18 @@ public class MainForm extends JFrame {
 	private GraphicsDevice graphicsDevice;
 	private int NES_HEIGHT, NES_WIDTH;
 	private Renderer renderer;
-	private final ControllerImpl padController1, padController2;
 
 
 	public MainForm()
 	{
 		init();
 		nes = new NES(this);
-		screenScaleFactor = PrefsSingleton.getInstance().getInt("screenScaling", 2);
-		padController1 = new ControllerImpl(this, 0);
-		padController2 = new ControllerImpl(this, 1);
+		padController1 = new ControllerKeyListener(0);
+		padController2 = new ControllerKeyListener(1);
 		nes.setControllers(padController1, padController2);
-		padController1.startEventQueue();
-		padController2.startEventQueue();
+
+		addKeyListener(padController1);
+		addKeyListener(padController2);
 	}
 
 	private synchronized void setRenderOptions()
@@ -113,19 +134,19 @@ public class MainForm extends JFrame {
 		add(canvas);
 		pack();
 		canvas.createBufferStrategy(2);
-		bufferStrategy = canvas.getBufferStrategy();
 	}
 
-	public void start(String[] args)
+	public void start()
 	{
-		if (args == null || args.length < 1 || args[0] == null) {
-			nes.start();
-		} else {
-			nes.run(args[0]);
-		}
+		nes.start();
 	}
 
-	private synchronized void init()
+	private void stop()
+	{
+		nes.stop();
+	}
+
+	private void init()
 	{
 		actionListener = new ActionListener() {
 			@Override
@@ -133,48 +154,52 @@ public class MainForm extends JFrame {
 			{
 				String cmd = e.getActionCommand();
 				// placeholder for more robust handler
-				if (cmd.equals("Quit")) {
+				if (cmd.equals(CMD_QUIT)) {
 					close();
-				} else if (cmd.equals("Reset")) {
+				} else if (cmd.equals(CMD_RESET)) {
 					nes.reset();
-				} else if (cmd.equals("Hard Reset")) {
-					nes.reloadROM();
-				} else if (cmd.equals("Pause")) {
+				} else if (cmd.equals(CMD_HARD_RESET)) {
+					try {
+						nes.reloadROM();
+					} catch (Exception exp) {
+						showMessageDialog(exp.getMessage());
+					}
+				} else if (cmd.equals(CMD_PAUSE)) {
 					nes.pause();
-				} else if (cmd.equals("Resume")) {
+				} else if (cmd.equals(CMD_RESUME)) {
 					nes.resume();
-				} else if (cmd.equals("Preferences")) {
+				} else if (cmd.equals(CMD_PREF)) {
 					showOptions();
-				} else if (cmd.equals("Fast Forward")) {
+				} else if (cmd.equals(CMD_FAST_FORWARD)) {
 					nes.toggleFrameLimiter();
-				} else if (cmd.equals("About")) {
-					messageBox("HalfNES " + NES.VERSION
+				} else if (cmd.equals(CMD_ABOUT)) {
+					showMessageDialog("HalfNES " + NES.VERSION
 							+ "\n"
 							+ "Get the latest version and report any bugs at " + NES.URL + " \n"
 							+ "\n"
 							+ "This program is free software licensed under the GPL version 3, and comes with \n"
 							+ "NO WARRANTY of any kind. (but if something's broken, please report it). \n"
 							+ "See the license.txt file for details.");
-				} else if (cmd.equals("ROM Info")) {
+				} else if (cmd.equals(CMD_ROM_INFO)) {
 					String info = nes.getrominfo();
 					if (info != null) {
-						messageBox(info);
+						showMessageDialog(info);
 					}
-				} else if (cmd.equals("Open ROM")) {
+				} else if (cmd.equals(CMD_OPEN_ROM)) {
 					loadROM();
-				} else if (cmd.equals("Toggle Fullscreen")) {
+				} else if (cmd.equals(CMD_TOGGLE_FULL_SCREEN)) {
 					toggleFullScreen();
-				} else if (cmd.equals("Frame Advance")) {
+				} else if (cmd.equals(CMD_FRAME_ADVANCE)) {
 					nes.frameAdvance();
-				} else if (cmd.equals("Escape")) {
+				} else if (cmd.equals(CMD_ESCAPE)) {
 					if (inFullScreen) {
 						toggleFullScreen();
 					} else {
 						close();
 					}
-				} else if (cmd.equals("Controller Settings")) {
+				} else if (cmd.equals(CMD_CONTROLLER_SETTINGS)) {
 					showControlsDialog();
-				} else if (cmd.equals("Cheat Codes")) {
+				} else if (cmd.equals(CMD_CHEAT_CODES)) {
 					showActionReplayDialog();
 				}
 			}
@@ -185,15 +210,11 @@ public class MainForm extends JFrame {
 		setResizable(false);
 		buildMenus(actionListener);
 		setRenderOptions();
+		setLocation(PrefsSingleton.getInstance().getInt("windowX", 0), PrefsSingleton.getInstance().getInt("windowY", 0));
 
-		getRootPane().registerKeyboardAction(actionListener, "Escape",
-				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
-		getRootPane().registerKeyboardAction(actionListener, "Toggle Fullscreen",
-				KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
-		getRootPane().registerKeyboardAction(actionListener, "Quit",
-				KeyStroke.getKeyStroke(KeyEvent.VK_F4, KeyEvent.ALT_DOWN_MASK), JComponent.WHEN_IN_FOCUSED_WINDOW);
-		setLocation(PrefsSingleton.getInstance().getInt("windowX", 0),
-				PrefsSingleton.getInstance().getInt("windowY", 0));
+		registerKeyboardAction(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), CMD_ESCAPE);
+		registerKeyboardAction(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0), CMD_TOGGLE_FULL_SCREEN);
+		registerKeyboardAction(KeyStroke.getKeyStroke(KeyEvent.VK_F4, KeyEvent.ALT_DOWN_MASK), CMD_QUIT);
 
 		addWindowListener(new WindowListener() {
 			@Override
@@ -272,6 +293,27 @@ public class MainForm extends JFrame {
 		});
 	}
 
+	private void registerKeyboardAction(final KeyStroke keyStroke, String cmd)
+	{
+		if (keyStroke == null
+			|| cmd == null || cmd.isEmpty()) {
+			return;
+		}
+
+		JRootPane rootPane = getRootPane();
+		InputMap inputMap = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+		ActionMap actionMap = rootPane.getActionMap();
+
+		inputMap.put(keyStroke, keyStroke);
+		actionMap.put(keyStroke, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				actionListener.actionPerformed(new ActionEvent(e.getSource(), e.getID(), cmd));
+			}
+		});
+	}
+
 	private void buildMenus(ActionListener actionListener)
 	{
 		if (actionListener == null) {
@@ -284,74 +326,74 @@ public class MainForm extends JFrame {
 		menuBar.add(menu);
 
 		JMenuItem item;
-		menu.add(item = new JMenuItem("Open ROM"));
+		menu.add(item = new JMenuItem(CMD_OPEN_ROM));
 		item.addActionListener(actionListener);
 		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
 				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
 		menu.addSeparator();
 
-		menu.add(item = new JMenuItem("Preferences"));
+		menu.add(item = new JMenuItem(CMD_PREF));
 		item.addActionListener(actionListener);
 		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,
 				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
 		menu.addSeparator();
 
-		menu.add(item = new JMenuItem("Toggle Fullscreen"));
+		menu.add(item = new JMenuItem(CMD_TOGGLE_FULL_SCREEN));
 		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0));
 		item.addActionListener(actionListener);
 
-		menu.add(item = new JMenuItem("Quit"));
+		menu.add(item = new JMenuItem(CMD_QUIT));
 		item.addActionListener(actionListener);
 		menuBar.add(menu);
 
 		menu = new JMenu("NES");
 		menuBar.add(menu);
 
-		menu.add(item = new JMenuItem("Reset"));
+		menu.add(item = new JMenuItem(CMD_RESET));
 		item.addActionListener(actionListener);
 		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
 				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
-		menu.add(item = new JMenuItem("Hard Reset"));
+		menu.add(item = new JMenuItem(CMD_HARD_RESET));
 		item.addActionListener(actionListener);
 		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,
 				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
-		menu.add(item = new JMenuItem("Pause"));
+		menu.add(item = new JMenuItem(CMD_PAUSE));
 		item.addActionListener(actionListener);
 		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0));
 
-		menu.add(item = new JMenuItem("Resume"));
+		menu.add(item = new JMenuItem(CMD_RESUME));
 		item.addActionListener(actionListener);
 		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F8, 0));
 
-		menu.add(item = new JMenuItem("Fast Forward"));
+		menu.add(item = new JMenuItem(CMD_FAST_FORWARD));
 		item.addActionListener(actionListener);
 		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE,
 				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
-		menu.add(item = new JMenuItem("Frame Advance"));
+		menu.add(item = new JMenuItem(CMD_FRAME_ADVANCE));
 		item.addActionListener(actionListener);
 		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD,
 				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
 		menu.addSeparator();
 
-		menu.add(item = new JMenuItem("Controller Settings"));
+		menu.add(item = new JMenuItem(CMD_CONTROLLER_SETTINGS));
 		item.addActionListener(actionListener);
 		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
 				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
-		menu.add(item = new JMenuItem("Cheat Codes"));
+		menu.add(item = new JMenuItem(CMD_CHEAT_CODES));
 		item.addActionListener(actionListener);
 		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F10,
 				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
 		menu.addSeparator();
 
-		menu.add(item = new JMenuItem("ROM Info"));
+		menu.add(item = new JMenuItem(CMD_ROM_INFO));
 		item.addActionListener(actionListener);
 		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I,
 				Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
@@ -359,7 +401,7 @@ public class MainForm extends JFrame {
 		menu = new JMenu("Help");
 		menuBar.add(menu);
 
-		menu.add(item = new JMenuItem("About"));
+		menu.add(item = new JMenuItem(CMD_ABOUT));
 		item.addActionListener(actionListener);
 		item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
 
@@ -408,18 +450,26 @@ public class MainForm extends JFrame {
 
 	private void loadROM(String path)
 	{
-		if (path.endsWith(".zip") || path.endsWith(".ZIP")) {
+		if (path == null || path.isEmpty()) {
+			return;
+		}
+
+		if (path.toLowerCase().endsWith(".zip")) {
 			try {
 				loadRomFromZip(path);
-			} catch (IOException ex) {
-				messageBox("Could not load file:\nFile does not exist or is not a valid NES game.\n" + ex.getMessage());
+			} catch (Exception e) {
+				showMessageDialog("Could not load file:\nFile does not exist or is not a valid NES game.\n" + e.getMessage());
 			}
 		} else {
-			nes.loadROM(path);
+			try {
+				nes.loadROM(path);
+			} catch (Exception e) {
+				showMessageDialog(e.getMessage());
+			}
 		}
 	}
 
-	private void loadRomFromZip(String zipName) throws IOException
+	private void loadRomFromZip(String zipName) throws Exception
 	{
 		final String romName = selectRomInZip(listRomsInZip(zipName));
 		if (romName != null) {
@@ -436,32 +486,39 @@ public class MainForm extends JFrame {
 		final ZipFile zipFile = new ZipFile(zipName);
 		final Enumeration<? extends ZipEntry> zipEntries = zipFile.entries();
 		final List<String> romNames = new ArrayList<>();
+
 		while (zipEntries.hasMoreElements()) {
 			final ZipEntry entry = zipEntries.nextElement();
-			if (!entry.isDirectory() && (entry.getName().endsWith(".nes")
+			if (!entry.isDirectory()
+				&& (entry.getName().endsWith(".nes")
 					|| entry.getName().endsWith(".fds")
 					|| entry.getName().endsWith(".nsf"))) {
 				romNames.add(entry.getName());
 			}
 		}
+
 		zipFile.close();
 		if (romNames.isEmpty()) {
 			throw new IOException("No NES games found in ZIP file.");
 		}
+
 		return romNames;
 	}
 
 	private String selectRomInZip(List<String> romNames)
 	{
-		if (romNames.size() > 1) {
-			return (String) JOptionPane.showInputDialog(this,
-					"Select ROM to load", "Select ROM to load",
-					JOptionPane.PLAIN_MESSAGE, null,
-					romNames.toArray(), romNames.get(0));
-		} else if (romNames.size() == 1) {
+		if (romNames == null || romNames.isEmpty()) {
+			return null;
+		}
+
+		if (romNames.size() == 1) {
 			return romNames.get(0);
 		}
-		return null;
+
+		return (String) JOptionPane.showInputDialog(this,
+				"Select ROM to load", "Select ROM to load",
+				JOptionPane.PLAIN_MESSAGE, null,
+				romNames.toArray(), romNames.get(0));
 	}
 
 	private File extractRomFromZip(String zipName, String romName) throws IOException
@@ -483,7 +540,7 @@ public class MainForm extends JFrame {
 				+ File.separator + FileUtils.stripExtension(new File(zipName).getName())
 				+ " - " + romName);
 		if (outputFile.exists()) {
-			messageBox("Cannot extract file. File " + outputFile.getCanonicalPath() + " already exists.");
+			showMessageDialog("Cannot extract file. File " + outputFile.getCanonicalPath() + " already exists.");
 			zipStream.close();
 			return null;
 		}
@@ -514,7 +571,7 @@ public class MainForm extends JFrame {
 			graphicsDevice = getGraphicsConfiguration().getDevice();
 			if (!graphicsDevice.isFullScreenSupported()) {
 				//then fullscreen will give a window the size of the screen instead
-				messageBox("Fullscreen is not supported by your OS or version of Java.");
+				showMessageDialog("Fullscreen is not supported by your OS or version of Java.");
 				return;
 			}
 			dispose();
@@ -530,12 +587,7 @@ public class MainForm extends JFrame {
 		}
 	}
 
-	public void messageBox(final String message)
-	{
-		JOptionPane.showMessageDialog(this, message);
-	}
 
-	private BufferedImage frame;
 	private int frameSkip = 0;
 
 
@@ -552,13 +604,13 @@ public class MainForm extends JFrame {
 		frameTimeIdx %= frameTimes.length;
 
 		if (frameTimeIdx == 0) {
-			long averageFrames = 0;
-			for (long l : frameTimes) {
-				averageFrames += l;
+			long averageFrameTime = 0;
+			for (long time : frameTimes) {
+				averageFrameTime += time;
 			}
+			averageFrameTime /= frameTimes.length;
 
-			averageFrames /= frameTimes.length;
-			double fps = 1E9 / averageFrames;
+			double fps = 1E9 / averageFrameTime;
 			setTitle(String.format("HalfNES %s - %s, %2.2f fps"
 					+ ((frameSkip > 0) ? " frameskip " + frameSkip : ""),
 					NES.VERSION,
@@ -567,14 +619,20 @@ public class MainForm extends JFrame {
 		}
 
 		if (nes.frameCount % (frameSkip + 1) == 0) {
-			frame = renderer.render(nextFrame, bgColors, dotcrawl);
-			drawImage();
+			BufferedImage frameImage = renderer.render(nextFrame, bgColors, dotcrawl);
+			drawFrameImage(frameImage);
 		}
 	}
 
-	public final synchronized void drawImage()
+	private void drawFrameImage(BufferedImage frameImage)
 	{
-		final Graphics2D graphics = (Graphics2D) bufferStrategy.getDrawGraphics();
+		if (frameImage == null) {
+			return;
+		}
+
+		BufferStrategy bufferStrategy = canvas.getBufferStrategy();
+		Graphics2D graphics = (Graphics2D) bufferStrategy.getDrawGraphics();
+
 		if (smoothScale) {
 			graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 		}
@@ -589,24 +647,23 @@ public class MainForm extends JFrame {
 				double scaleFactor = getMinScale(scrnwidth, scrnheight);
 				int height = (int) (NES_HEIGHT * scaleFactor);
 				int width = (int) (256 * scaleFactor * 1.1666667);
-				graphics.drawImage(frame, ((scrnwidth / 2) - (width / 2)),
+				graphics.drawImage(frameImage, ((scrnwidth / 2) - (width / 2)),
 						((scrnheight / 2) - (height / 2)),
 						width,
 						height,
 						null);
 			} else {
-				graphics.drawImage(frame, 0, 0, scrnwidth, scrnheight, null);
+				graphics.drawImage(frameImage, 0, 0, scrnwidth, scrnheight, null);
 			}
 			graphics.setColor(Color.DARK_GRAY);
 			graphics.drawString(getTitle(), 16, 16);
 
 		} else {
-			graphics.drawImage(frame, 0, 0, NES_WIDTH * screenScaleFactor, NES_HEIGHT * screenScaleFactor, null);
+			graphics.drawImage(frameImage, 0, 0, NES_WIDTH * screenScaleFactor, NES_HEIGHT * screenScaleFactor, null);
 		}
 
 		graphics.dispose();
 		bufferStrategy.show();
-
 	}
 
 	private void showOptions()
@@ -653,12 +710,15 @@ public class MainForm extends JFrame {
 		return Math.min(height / (double) NES_HEIGHT, width / (double) NES_WIDTH);
 	}
 
+	private void showMessageDialog(final String message)
+	{
+		JOptionPane.showMessageDialog(this, message);
+	}
+
 	private void close()
 	{
-		dispose();
+		stop();
 		saveWindowLocation();
-		padController1.stopEventQueue();
-		padController2.stopEventQueue();
-		nes.stop();
+		dispose();
 	}
 }

@@ -4,10 +4,11 @@
  */
 package com.grapeshot.halfnes;
 
-import com.grapeshot.halfnes.ui.MainForm;
+import java.io.IOException;
 
-import java.io.*;
-import javax.swing.*;
+import javax.swing.UIManager;
+
+import com.grapeshot.halfnes.ui.MainForm;
 
 
 public class halfNES {
@@ -22,8 +23,8 @@ public class halfNES {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
-			System.err.println("Could not set system look and feel. Meh.");
+			;
 		}
-		new MainForm().start(args);
+		new MainForm().start();
 	}
 }

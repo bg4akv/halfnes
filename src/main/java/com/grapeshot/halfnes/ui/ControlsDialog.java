@@ -10,12 +10,13 @@
  */
 package com.grapeshot.halfnes.ui;
 
-import com.grapeshot.halfnes.PrefsSingleton;
 import java.awt.event.KeyEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+
+import com.grapeshot.halfnes.PrefsSingleton;
 
 /**
  *
@@ -31,6 +32,10 @@ public class ControlsDialog extends javax.swing.JDialog {
 	 */
 	public ControlsDialog(java.awt.Frame parent) {
 		super(parent, true);
+		if (parent != null) {
+			setLocation(parent.getLocation());
+		}
+
 		Preferences prefs = PrefsSingleton.getInstance();
 		int[][] keys = {{prefs.getInt("keyUp1", KeyEvent.VK_UP),
 				prefs.getInt("keyDown1", KeyEvent.VK_DOWN),
@@ -157,11 +162,13 @@ public class ControlsDialog extends javax.swing.JDialog {
 
 		jField1Up.setMinimumSize(new java.awt.Dimension(120, 20));
 		jField1Up.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				jField2StartActionPerformed(evt);
 			}
 		});
 		jField1Up.addKeyListener(new java.awt.event.KeyAdapter() {
+			@Override
 			public void keyReleased(java.awt.event.KeyEvent evt) {
 				jField1UpKeyReleased(evt);
 			}
@@ -169,11 +176,13 @@ public class ControlsDialog extends javax.swing.JDialog {
 
 		jField1Down.setMinimumSize(new java.awt.Dimension(120, 20));
 		jField1Down.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				jField2StartActionPerformed(evt);
 			}
 		});
 		jField1Down.addKeyListener(new java.awt.event.KeyAdapter() {
+			@Override
 			public void keyReleased(java.awt.event.KeyEvent evt) {
 				jField1DownKeyReleased(evt);
 			}
@@ -181,11 +190,13 @@ public class ControlsDialog extends javax.swing.JDialog {
 
 		jField1Right.setMinimumSize(new java.awt.Dimension(120, 20));
 		jField1Right.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				jField2StartActionPerformed(evt);
 			}
 		});
 		jField1Right.addKeyListener(new java.awt.event.KeyAdapter() {
+			@Override
 			public void keyReleased(java.awt.event.KeyEvent evt) {
 				jField1RightKeyReleased(evt);
 			}
@@ -193,11 +204,13 @@ public class ControlsDialog extends javax.swing.JDialog {
 
 		jField1Left.setMinimumSize(new java.awt.Dimension(120, 20));
 		jField1Left.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				jField2StartActionPerformed(evt);
 			}
 		});
 		jField1Left.addKeyListener(new java.awt.event.KeyAdapter() {
+			@Override
 			public void keyReleased(java.awt.event.KeyEvent evt) {
 				jField1LeftKeyReleased(evt);
 			}
@@ -205,6 +218,7 @@ public class ControlsDialog extends javax.swing.JDialog {
 
 		jField1Start.setMinimumSize(new java.awt.Dimension(120, 20));
 		jField1Start.addKeyListener(new java.awt.event.KeyAdapter() {
+			@Override
 			public void keyReleased(java.awt.event.KeyEvent evt) {
 				jField1StartKeyReleased(evt);
 			}
@@ -212,6 +226,7 @@ public class ControlsDialog extends javax.swing.JDialog {
 
 		jField1Select.setMinimumSize(new java.awt.Dimension(120, 20));
 		jField1Select.addKeyListener(new java.awt.event.KeyAdapter() {
+			@Override
 			public void keyReleased(java.awt.event.KeyEvent evt) {
 				jField1SelectKeyReleased(evt);
 			}
@@ -219,6 +234,7 @@ public class ControlsDialog extends javax.swing.JDialog {
 
 		jField1B.setMinimumSize(new java.awt.Dimension(120, 20));
 		jField1B.addKeyListener(new java.awt.event.KeyAdapter() {
+			@Override
 			public void keyReleased(java.awt.event.KeyEvent evt) {
 				jField1BKeyReleased(evt);
 			}
@@ -226,6 +242,7 @@ public class ControlsDialog extends javax.swing.JDialog {
 
 		jField1A.setMinimumSize(new java.awt.Dimension(120, 20));
 		jField1A.addKeyListener(new java.awt.event.KeyAdapter() {
+			@Override
 			public void keyReleased(java.awt.event.KeyEvent evt) {
 				jField1AKeyReleased(evt);
 			}
@@ -233,6 +250,7 @@ public class ControlsDialog extends javax.swing.JDialog {
 
 		jField2Up.setMinimumSize(new java.awt.Dimension(120, 20));
 		jField2Up.addKeyListener(new java.awt.event.KeyAdapter() {
+			@Override
 			public void keyReleased(java.awt.event.KeyEvent evt) {
 				jField2UpKeyReleased(evt);
 			}
@@ -240,6 +258,7 @@ public class ControlsDialog extends javax.swing.JDialog {
 
 		jField2Down.setMinimumSize(new java.awt.Dimension(120, 20));
 		jField2Down.addKeyListener(new java.awt.event.KeyAdapter() {
+			@Override
 			public void keyReleased(java.awt.event.KeyEvent evt) {
 				jField2DownKeyReleased(evt);
 			}
@@ -247,6 +266,7 @@ public class ControlsDialog extends javax.swing.JDialog {
 
 		jField2Left.setMinimumSize(new java.awt.Dimension(120, 20));
 		jField2Left.addKeyListener(new java.awt.event.KeyAdapter() {
+			@Override
 			public void keyReleased(java.awt.event.KeyEvent evt) {
 				jField2LeftKeyReleased(evt);
 			}
@@ -254,6 +274,7 @@ public class ControlsDialog extends javax.swing.JDialog {
 
 		jField2Right.setMinimumSize(new java.awt.Dimension(120, 20));
 		jField2Right.addKeyListener(new java.awt.event.KeyAdapter() {
+			@Override
 			public void keyReleased(java.awt.event.KeyEvent evt) {
 				jField2RightKeyReleased(evt);
 			}
@@ -261,6 +282,7 @@ public class ControlsDialog extends javax.swing.JDialog {
 
 		jField2A.setMinimumSize(new java.awt.Dimension(120, 20));
 		jField2A.addKeyListener(new java.awt.event.KeyAdapter() {
+			@Override
 			public void keyReleased(java.awt.event.KeyEvent evt) {
 				jField2AKeyReleased(evt);
 			}
@@ -268,6 +290,7 @@ public class ControlsDialog extends javax.swing.JDialog {
 
 		jField2B.setMinimumSize(new java.awt.Dimension(120, 20));
 		jField2B.addKeyListener(new java.awt.event.KeyAdapter() {
+			@Override
 			public void keyReleased(java.awt.event.KeyEvent evt) {
 				jField2BKeyReleased(evt);
 			}
@@ -275,6 +298,7 @@ public class ControlsDialog extends javax.swing.JDialog {
 
 		jField2Select.setMinimumSize(new java.awt.Dimension(120, 20));
 		jField2Select.addKeyListener(new java.awt.event.KeyAdapter() {
+			@Override
 			public void keyReleased(java.awt.event.KeyEvent evt) {
 				jField2SelectKeyReleased(evt);
 			}
@@ -282,6 +306,7 @@ public class ControlsDialog extends javax.swing.JDialog {
 
 		jField2Start.setMinimumSize(new java.awt.Dimension(120, 20));
 		jField2Start.addKeyListener(new java.awt.event.KeyAdapter() {
+			@Override
 			public void keyReleased(java.awt.event.KeyEvent evt) {
 				jField2StartKeyReleased(evt);
 			}
@@ -289,6 +314,7 @@ public class ControlsDialog extends javax.swing.JDialog {
 
 		jButtonCancel.setText("Cancel"); // NOI18N
 		jButtonCancel.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				jButtonCancelActionPerformed(evt);
 			}
@@ -296,6 +322,7 @@ public class ControlsDialog extends javax.swing.JDialog {
 
 		jButtonOK.setText("OK"); // NOI18N
 		jButtonOK.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				jButtonOKActionPerformed(evt);
 			}
@@ -312,6 +339,7 @@ public class ControlsDialog extends javax.swing.JDialog {
 		jButton1.setText("Set Buttons");
 		jButton1.setEnabled(false);
 		jButton1.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				jButton1ActionPerformed(evt);
 			}
@@ -320,6 +348,7 @@ public class ControlsDialog extends javax.swing.JDialog {
 		jButton2.setText("Set Buttons");
 		jButton2.setEnabled(false);
 		jButton2.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				jButton2ActionPerformed(evt);
 			}
