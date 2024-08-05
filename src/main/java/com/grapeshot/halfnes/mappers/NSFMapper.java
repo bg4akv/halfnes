@@ -6,6 +6,8 @@ package com.grapeshot.halfnes.mappers;
 
 import com.grapeshot.halfnes.*;
 import com.grapeshot.halfnes.audio.*;
+import com.grapeshot.halfnes.ppu.PPU;
+
 import java.util.Arrays;
 
 /**

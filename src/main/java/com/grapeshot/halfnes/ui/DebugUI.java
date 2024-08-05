@@ -4,67 +4,74 @@
  */
 package com.grapeshot.halfnes.ui;
 
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
 import com.grapeshot.halfnes.NES;
-import java.awt.*;
-import java.awt.image.*;
-import javax.swing.*;
 
 public class DebugUI extends JFrame {
-	// StrokeInformer aStrokeInformer = new StrokeInformer();
+	private final FramePanel framePanel;
+	private final int width, height;
 
-	private ShowFrame fbuf;
-	private int xsize, ysize;
-	private Repainter painter = new Repainter();
 
-	public DebugUI(int height, int width) {
-		this.xsize = height;
-		this.ysize = width;
-		fbuf = new ShowFrame();
-		fbuf.setIgnoreRepaint(true);
+	public DebugUI(int width, int height)
+	{
+		setTitle("HalfNES  Debug " + NES.VERSION);
+		setResizable(false);
+		setDefaultCloseOperation(HIDE_ON_CLOSE);
+
+		this.width = width;
+		this.height = height;
+		framePanel = new FramePanel(width, height);
+		framePanel.setIgnoreRepaint(true);
+		setContentPane(framePanel);
+		pack();
 	}
 
-	public void run() {
-		this.setTitle("HalfNES  Debug " + NES.VERSION);
-		this.setResizable(false);
-		this.setDefaultCloseOperation(HIDE_ON_CLOSE);
-		this.setContentPane(fbuf);
-		this.pack();
-		this.setVisible(true);
+	public void run()
+	{
+		setVisible(true);
 	}
 
-	public void messageBox(String s) {
-		JOptionPane.showMessageDialog(fbuf, s);
+	public void setFrame(BufferedImage frameImage)
+	{
+		framePanel.setImage(frameImage);
+
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run()
+			{
+				framePanel.repaint();
+			}
+		});
 	}
 
-	public void setFrame(BufferedImage b) {
-		fbuf.nextFrame = b;
+	public class FramePanel extends JPanel {
+		private final int width, height;
+		public BufferedImage frameImage;
 
-		java.awt.EventQueue.invokeLater(painter);
-		//do the actual screen update on the event thread, basically all this does is blit the new frame
-	}
-
-	public class Repainter implements Runnable {
-
-		public void run() {
-			fbuf.repaint();
+		public FramePanel(int width, int height)
+		{
+			this.width = width;
+			this.height = height;
+			setBounds(0, 0, width, height);
+			setPreferredSize(new Dimension(width, height));
 		}
-	}
 
-	public class ShowFrame extends javax.swing.JPanel {
-
-		public BufferedImage nextFrame;
-
-		/**
-		 *
-		 */
-		public ShowFrame() {
-			this.setBounds(0, 0, xsize, ysize);
-			this.setPreferredSize(new Dimension(xsize, ysize));
+		public void setImage(BufferedImage image)
+		{
+			frameImage = image;
 		}
 
 		@Override
-		public void paint(final Graphics g) {
-			g.drawImage(nextFrame, 0, 0, xsize, ysize, null);
+		public void paint(final Graphics g)
+		{
+			g.drawImage(frameImage, 0, 0, width, height, null);
 		}
 	}
 }

@@ -26,22 +26,22 @@ public class Sunsoft5BSoundChip implements ExpansionSoundChip {
 		//System.err.println(register + " " + data);
 		switch (register) {
 			case 0:
-				timers[0].setperiod((timers[0].getperiod() & 0xf00) + data);
+				timers[0].setPeriod((timers[0].getPeriod() & 0xf00) + data);
 				break;
 			case 1:
-				timers[0].setperiod((timers[0].getperiod() & 0xff) + ((data & 0xf) << 8));
+				timers[0].setPeriod((timers[0].getPeriod() & 0xff) + ((data & 0xf) << 8));
 				break;
 			case 2:
-				timers[1].setperiod((timers[1].getperiod() & 0xf00) + data);
+				timers[1].setPeriod((timers[1].getPeriod() & 0xf00) + data);
 				break;
 			case 3:
-				timers[1].setperiod((timers[1].getperiod() & 0xff) + ((data & 0xf) << 8));
+				timers[1].setPeriod((timers[1].getPeriod() & 0xff) + ((data & 0xf) << 8));
 				break;
 			case 4:
-				timers[2].setperiod((timers[2].getperiod() & 0xf00) + data);
+				timers[2].setPeriod((timers[2].getPeriod() & 0xf00) + data);
 				break;
 			case 5:
-				timers[2].setperiod((timers[2].getperiod() & 0xff) + ((data & 0xf) << 8));
+				timers[2].setPeriod((timers[2].getPeriod() & 0xff) + ((data & 0xf) << 8));
 				break;
 			case 7:
 				for (int i = 0; i < 3; ++i) {
@@ -78,9 +78,9 @@ public class Sunsoft5BSoundChip implements ExpansionSoundChip {
 
 	@Override
 	public final int getval() {
-		return (enable[0] ? ((useenvelope[0] ? enval : VOLTBL[volume[0]]) * timers[0].getval()) : 0)
-				+ (enable[1] ? ((useenvelope[1] ? enval : VOLTBL[volume[1]]) * timers[1].getval()) : 0)
-				+ (enable[2] ? ((useenvelope[2] ? enval : VOLTBL[volume[2]]) * timers[2].getval()) : 0);
+		return (enable[0] ? ((useenvelope[0] ? enval : VOLTBL[volume[0]]) * timers[0].getVal()) : 0)
+				+ (enable[1] ? ((useenvelope[1] ? enval : VOLTBL[volume[1]]) * timers[1].getVal()) : 0)
+				+ (enable[2] ? ((useenvelope[2] ? enval : VOLTBL[volume[2]]) * timers[2].getVal()) : 0);
 	}
 
 	public static int[] getvoltbl() {

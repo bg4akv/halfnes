@@ -9,13 +9,27 @@ package com.grapeshot.halfnes.audio;
  * @author Andrew
  */
 public class SquareTimer extends Timer {
-
 	protected int[] values;
 	final private int periodadd;
 	private int divider = 0;
 
+
+	public SquareTimer(final int ctrlen)
+	{
+		this(ctrlen, 0);
+	}
+
+	public SquareTimer(final int ctrlen, final int periodadd)
+	{
+		super(0, 0);
+		this.periodadd = periodadd;
+		values = new int[ctrlen];
+		setDuty(ctrlen / 2);
+	}
+
 	@Override
-	public final void clock() {
+	public final void clock()
+	{
 		if (period + periodadd <= 0) {
 			return;
 		}
@@ -30,7 +44,8 @@ public class SquareTimer extends Timer {
 	}
 
 	@Override
-	public final void clock(final int cycles) {
+	public final void clock(final int cycles)
+	{
 		if (period < 8) {
 			return;
 		}
@@ -44,46 +59,35 @@ public class SquareTimer extends Timer {
 		divider -= (period + periodadd) * periods;
 	}
 
-	public SquareTimer(final int ctrlen, final int periodadd) {
-		this.periodadd = periodadd;
-		values = new int[ctrlen];
-		period = 0;
-		position = 0;
-		setduty(ctrlen / 2);
-	}
-
-	public SquareTimer(final int ctrlen) {
-		this.periodadd = 0;
-		values = new int[ctrlen];
-		period = 0;
-		position = 0;
-		setduty(ctrlen / 2);
-	}
-
 	@Override
-	public final void reset() {
+	public final void reset()
+	{
 		position = 0;
 	}
 
 	@Override
-	public final void setduty(final int duty) {
+	public final void setDuty(final int duty)
+	{
 		for (int i = 0; i < values.length; ++i) {
-			values[i] = (i < duty) ? 1 : 0;
+			values[i] = (i < duty)? 1 : 0;
 		}
 	}
 
 	@Override
-	public final void setduty(int[] dutyarray) {
+	public final void setDuty(int[] dutyarray)
+	{
 		values = dutyarray;
 	}
 
 	@Override
-	public final int getval() {
+	public final int getVal()
+	{
 		return values[position];
 	}
 
 	@Override
-	public final void setperiod(final int newperiod) {
+	public final void setPeriod(final int newperiod)
+	{
 		period = newperiod;
 	}
 }

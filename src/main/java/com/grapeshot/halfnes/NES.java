@@ -11,6 +11,7 @@ import javafx.application.Platform;
 import com.grapeshot.halfnes.cheats.ActionReplay;
 import com.grapeshot.halfnes.mappers.BadMapperException;
 import com.grapeshot.halfnes.mappers.Mapper;
+import com.grapeshot.halfnes.ppu.PPU;
 import com.grapeshot.halfnes.ui.ControllerKeyListener;
 import com.grapeshot.halfnes.ui.FrameLimiter;
 import com.grapeshot.halfnes.ui.MainForm;

@@ -10,10 +10,10 @@ import java.util.zip.CRC32;
 
 import com.grapeshot.halfnes.CPU;
 import com.grapeshot.halfnes.CPUAddrSpace;
-import com.grapeshot.halfnes.PPU;
 import com.grapeshot.halfnes.PrefsSingleton;
 import com.grapeshot.halfnes.ROMLoader;
 import com.grapeshot.halfnes.utils;
+import com.grapeshot.halfnes.ppu.PPU;
 
 
 public abstract class Mapper {

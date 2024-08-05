@@ -155,7 +155,7 @@ public class MainForm extends JFrame {
 				String cmd = e.getActionCommand();
 				// placeholder for more robust handler
 				if (cmd.equals(CMD_QUIT)) {
-					close();
+					dispose();
 				} else if (cmd.equals(CMD_RESET)) {
 					nes.reset();
 				} else if (cmd.equals(CMD_HARD_RESET)) {
@@ -195,7 +195,7 @@ public class MainForm extends JFrame {
 					if (inFullScreen) {
 						toggleFullScreen();
 					} else {
-						close();
+						dispose();
 					}
 				} else if (cmd.equals(CMD_CONTROLLER_SETTINGS)) {
 					showControlsDialog();
@@ -244,7 +244,7 @@ public class MainForm extends JFrame {
 			@Override
 			public void windowClosing(WindowEvent e)
 			{
-				close();
+				dispose();
 			}
 
 			@Override
@@ -715,10 +715,11 @@ public class MainForm extends JFrame {
 		JOptionPane.showMessageDialog(this, message);
 	}
 
-	private void close()
+	@Override
+	public void dispose()
 	{
 		stop();
 		saveWindowLocation();
-		dispose();
+		super.dispose();
 	}
 }

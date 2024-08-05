@@ -29,24 +29,24 @@ public class VRC6SoundChip implements ExpansionSoundChip {
 			case 0x9000:
 				volume[0] = data & 0xf;
 				//duty cycle is between 12.5% and 50% unless last bit set and then it's forced to 100%
-				timers[0].setduty(((data & (utils.BIT7)) != 0) ? 16 : (((data >> 4) & 7) + 1));
+				timers[0].setDuty(((data & (utils.BIT7)) != 0) ? 16 : (((data >> 4) & 7) + 1));
 				break;
 			case 0x9001:
-				timers[0].setperiod((timers[0].getperiod() & 0xf00) + data);
+				timers[0].setPeriod((timers[0].getPeriod() & 0xf00) + data);
 				break;
 			case 0x9002:
-				timers[0].setperiod((timers[0].getperiod() & 0xff) + ((data & 0xf) << 8));
+				timers[0].setPeriod((timers[0].getPeriod() & 0xff) + ((data & 0xf) << 8));
 				enable[0] = ((data & (utils.BIT7)) != 0);
 				break;
 			case 0xa000:
 				volume[1] = data & 0xf;
-				timers[1].setduty(((data & (utils.BIT7)) != 0) ? 16 : (((data >> 4) & 7) + 1));
+				timers[1].setDuty(((data & (utils.BIT7)) != 0) ? 16 : (((data >> 4) & 7) + 1));
 				break;
 			case 0xa001:
-				timers[1].setperiod((timers[1].getperiod() & 0xf00) + data);
+				timers[1].setPeriod((timers[1].getPeriod() & 0xf00) + data);
 				break;
 			case 0xa002:
-				timers[1].setperiod((timers[1].getperiod() & 0xff) + ((data & 0xf) << 8));
+				timers[1].setPeriod((timers[1].getPeriod() & 0xff) + ((data & 0xf) << 8));
 				enable[1] = ((data & (utils.BIT7)) != 0);
 				break;
 			case 0xb000:
@@ -76,8 +76,8 @@ public class VRC6SoundChip implements ExpansionSoundChip {
 
 	@Override
 	public final int getval() {
-		return 320 * (((enable[0] ? volume[0] : 0) * timers[0].getval()
-				+ (enable[1] ? volume[1] : 0) * timers[1].getval())
+		return 320 * (((enable[0] ? volume[0] : 0) * timers[0].getVal()
+				+ (enable[1] ? volume[1] : 0) * timers[1].getVal())
 				+ (enable[2] ? ((volume[2] & 0xff) >> 3) : 0));
 	}
 

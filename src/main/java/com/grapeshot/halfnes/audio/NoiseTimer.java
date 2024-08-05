@@ -11,18 +11,18 @@ import com.grapeshot.halfnes.utils;
  * @author Andrew
  */
 public class NoiseTimer extends Timer {
-
 	private int divider = 0;
 	private int[] values = genvalues(1, 1);
 	private int prevduty = 1;
 	private final static int periodadd = 0;
 
-	public NoiseTimer() {
-		period = 0;
+	public NoiseTimer()
+	{
+		super(0, 0);
 	}
 
 	@Override
-	public void setduty(int duty) {
+	public void setDuty(int duty) {
 		if (duty != prevduty) {
 			values = genvalues(duty, values[position]);
 			position = 0;
@@ -43,7 +43,7 @@ public class NoiseTimer extends Timer {
 	}
 
 	@Override
-	public final int getval() {
+	public final int getVal() {
 		return (values[position] & 1);
 	}
 
@@ -65,7 +65,7 @@ public class NoiseTimer extends Timer {
 	}
 
 	@Override
-	public final void setperiod(final int newperiod) {
+	public final void setPeriod(final int newperiod) {
 		period = newperiod;
 	}
 
@@ -83,7 +83,7 @@ public class NoiseTimer extends Timer {
 	}
 
 	@Override
-	public void setduty(int[] duty) {
+	public void setDuty(int[] duty) {
 		throw new UnsupportedOperationException("Not supported on noise channel.");
 	}
 }

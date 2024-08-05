@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.awt.image.WritableRaster;
 
-import com.grapeshot.halfnes.PPU;
+import com.grapeshot.halfnes.ppu.PPU;
 
 /**
  *

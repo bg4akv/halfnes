@@ -38,7 +38,7 @@ public class MMC5SoundChip implements ExpansionSoundChip {
 				//length counter 1 halt
 				lenctrHalt[0] = ((data & (utils.BIT5)) != 0);
 				// pulse 1 duty cycle
-				timers[0].setduty(DUTYLOOKUP[data >> 6]);
+				timers[0].setDuty(DUTYLOOKUP[data >> 6]);
 				// and envelope
 				envConstVolume[0] = ((data & (utils.BIT4)) != 0);
 				envelopeValue[0] = data & 15;
@@ -50,14 +50,14 @@ public class MMC5SoundChip implements ExpansionSoundChip {
 				break;
 			case 0x2:
 				// pulse 1 timer low bit
-				timers[0].setperiod((timers[0].getperiod() & 0xfe00) + (data << 1));
+				timers[0].setPeriod((timers[0].getPeriod() & 0xfe00) + (data << 1));
 				break;
 			case 0x3:
 				// length counter load, timer 1 high bits
 				if (lenCtrEnable[0]) {
 					lengthctr[0] = LENCTRLOAD[data >> 3];
 				}
-				timers[0].setperiod((timers[0].getperiod() & 0x1ff) + ((data & 7) << 9));
+				timers[0].setPeriod((timers[0].getPeriod() & 0x1ff) + ((data & 7) << 9));
 				// sequencer restarted
 				timers[0].reset();
 				//envelope also restarted
@@ -67,7 +67,7 @@ public class MMC5SoundChip implements ExpansionSoundChip {
 				//length counter 2 halt
 				lenctrHalt[1] = ((data & (utils.BIT5)) != 0);
 				// pulse 2 duty cycle
-				timers[1].setduty(DUTYLOOKUP[data >> 6]);
+				timers[1].setDuty(DUTYLOOKUP[data >> 6]);
 				// and envelope
 				envConstVolume[1] = ((data & (utils.BIT4)) != 0);
 				envelopeValue[1] = data & 15;
@@ -78,13 +78,13 @@ public class MMC5SoundChip implements ExpansionSoundChip {
 				break;
 			case 0x6:
 				// pulse 2 timer low bit
-				timers[1].setperiod((timers[1].getperiod() & 0xfe00) + (data << 1));
+				timers[1].setPeriod((timers[1].getPeriod() & 0xfe00) + (data << 1));
 				break;
 			case 0x7:
 				if (lenCtrEnable[1]) {
 					lengthctr[1] = LENCTRLOAD[data >> 3];
 				}
-				timers[1].setperiod((timers[1].getperiod() & 0x1ff) + ((data & 7) << 9));
+				timers[1].setPeriod((timers[1].getPeriod() & 0x1ff) + ((data & 7) << 9));
 				// sequencer restarted
 				timers[1].reset();
 				//envelope also restarted
@@ -119,7 +119,7 @@ public class MMC5SoundChip implements ExpansionSoundChip {
 	public int getval() {
 		int accum = 0;
 		for (int i = 0; i < 2; ++i) {
-			accum += volume[i] * timers[i].getval() * 750;
+			accum += volume[i] * timers[i].getVal() * 750;
 		}
 		accum += pcmOut << 5;
 		return accum;

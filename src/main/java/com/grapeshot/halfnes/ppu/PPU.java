@@ -2,21 +2,35 @@
  * HalfNES by Andrew Hoffman
  * Licensed under the GNU GPL Version 3. See LICENSE file
  */
-package com.grapeshot.halfnes;
-
-import static com.grapeshot.halfnes.utils.reverseByte;
-import static java.awt.image.BufferedImage.TYPE_INT_BGR;
-import static java.util.Arrays.fill;
+package com.grapeshot.halfnes.ppu;
 
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
+import com.grapeshot.halfnes.PrefsSingleton;
+import com.grapeshot.halfnes.utils;
 import com.grapeshot.halfnes.mappers.Mapper;
 import com.grapeshot.halfnes.ui.DebugUI;
 import com.grapeshot.halfnes.ui.MainForm;
 
 
 public class PPU {
+	public static final int ADDR_PPUCTRL = 0x2000; //NMI enable (V), PPU master/slave (P), sprite height (H), background tile select (B), sprite tile select (S), increment mode (I), nametable select (NN)
+	public static final int ADDR_PPUMASK = 0x2001; //color emphasis (BGR), sprite enable (s), background enable (b), sprite left column enable (M), background left column enable (m), greyscale (G)
+	public static final int ADDR_PPUSTATUS = 0x2002; //vblank (V), sprite 0 hit (S), sprite overflow (O); read resets write pair for 0x2005/0x2006
+	public static final int ADDR_OAMADDR = 0x2003; //OAM read/write address
+	public static final int ADDR_OAMDATA = 0x2004; //OAM data read/write
+	public static final int ADDR_PPUSCROLL = 0x2005; //fine scroll position (two writes: X scroll, Y scroll)
+	public static final int ADDR_PPUADDR = 0x2006; //PPU read/write address (two writes: most significant byte, least significant byte)
+	public static final int ADDR_PPUDATA = 0x2007; //PPU data read/write
+	public static final int ADDR_OAMDMA = 0x4014; //OAM DMA high address
+
+
+
+
+
+
+
 	public static final int WIDTH = 256;
 	public static final int HEIGHT = 240;
 
@@ -27,9 +41,9 @@ public class PPU {
 	private int loopyX = 0;//fine x scroll
 	public int scanLineIdx = 0;
 	private int cycles = 0;
-	private int framecount = 0;
+	private int frameCount = 0;
 	private int div = 2;
-	private final int[] OAM = new int[256], secOAM = new int[32],
+	private final int[] OAM = new int[4*64], secOAM = new int[32],
 			spriteshiftregH = new int[8],
 			spriteshiftregL = new int[8], spriteXlatch = new int[8],
 			spritepals = new int[8], bitmap = new int[256 * HEIGHT];
@@ -54,27 +68,33 @@ public class PPU {
 	private int vblankline;
 	private final int[] cpudivider = {3, 3, 3, 3, 3};
 
-	public PPU(final Mapper mapper) {
-		this.pal = new int[] {0x09, 0x01, 0x00, 0x01, 0x00, 0x02, 0x02, 0x0D,
-				0x08, 0x10, 0x08, 0x24, 0x00, 0x00, 0x04, 0x2C, 0x09, 0x01, 0x34,
-				0x03, 0x00, 0x04, 0x00, 0x14, 0x08, 0x3A, 0x00, 0x02, 0x00, 0x20,
-				0x2C, 0x08};
+
+
+
+	public PPU(final Mapper mapper)
+	{
+		pal = new int[] {
+			0x09, 0x01, 0x00, 0x01, 0x00, 0x02, 0x02, 0x0D,
+			0x08, 0x10, 0x08, 0x24, 0x00, 0x00, 0x04, 0x2C, 0x09, 0x01, 0x34,
+			0x03, 0x00, 0x04, 0x00, 0x14, 0x08, 0x3A, 0x00, 0x02, 0x00, 0x20,
+			0x2C, 0x08
+		};
 		/*
 		power-up pallette checked by Blargg's power_up_palette test. Different
 		revs of NES PPU might give different initial results but there's a test
 		expecting this set of values and nesemu1, BizHawk, RockNES, MyNes use it
 		 */
 		this.mapper = mapper;
-		fill(OAM, 0xff);
+		Arrays.fill(OAM, 0xff);
 		if (PPUDEBUG) {
-			nametableView = new BufferedImage(512, 480, TYPE_INT_BGR);
+			nametableView = new BufferedImage(512, 480, BufferedImage.TYPE_INT_BGR);
 			debuggui = new DebugUI(512, 480);
 			debuggui.run();
 		}
 		setParameters();
 	}
 
-	final void setParameters()
+	public void setParameters()
 	{
 		//set stuff to NTSC or PAL or Dendy values
 		switch (mapper.getTVType()) {
@@ -355,7 +375,7 @@ public class PPU {
 		int skip = (scanLineCount == 262
 				&& scanline == 0
 				&& renderingOn()
-				&& !((framecount & (utils.BIT1)) != 0)) ? 1 : 0;
+				&& !((frameCount & (utils.BIT1)) != 0)) ? 1 : 0;
 		for (cycles = skip; cycles < 341; ++cycles) {
 			runOneClockCycle();
 		}
@@ -480,7 +500,7 @@ public class PPU {
 		} else if (cycles == 340) {
 			scanLineIdx = (scanLineIdx + 1) % scanLineCount;
 			if (scanLineIdx == 0) {
-				++framecount;
+				++frameCount;
 			}
 		}
 	}
@@ -687,8 +707,8 @@ public class PPU {
 		//now load up the shift registers for said sprite
 		final boolean hflip = ((oamextra & (utils.BIT6)) != 0);
 		if (!hflip) {
-			spriteshiftregL[found] = reverseByte(mapper.ppuRead(tilefetched));
-			spriteshiftregH[found] = reverseByte(mapper.ppuRead(tilefetched + 8));
+			spriteshiftregL[found] = utils.reverseByte(mapper.ppuRead(tilefetched));
+			spriteshiftregH[found] = utils.reverseByte(mapper.ppuRead(tilefetched + 8));
 		} else {
 			spriteshiftregL[found] = mapper.ppuRead(tilefetched);
 			spriteshiftregH[found] = mapper.ppuRead(tilefetched + 8);

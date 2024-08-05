@@ -14,11 +14,10 @@ import com.grapeshot.halfnes.audio.SwingAudioImpl;
 import com.grapeshot.halfnes.audio.Timer;
 import com.grapeshot.halfnes.audio.TriangleTimer;
 import com.grapeshot.halfnes.mappers.Mapper;
-import com.grapeshot.halfnes.ui.Oscilloscope;
+import com.grapeshot.halfnes.ui.OscilloScope;
 
 public class APU {
-
-	public int samplerate;
+	public int sampleRate;
 	private final Timer[] timers = {
 		new SquareTimer(8, 2), new SquareTimer(8, 2),
 		new TriangleTimer(), new NoiseTimer()};
@@ -74,7 +73,7 @@ public class APU {
 	private AudioOutInterface audioOutput;
 
 	public APU(final NES nes, final CPU cpu, final CPUAddrSpace cpuram) {
-		this.samplerate = 1; //just in case we can't init audio
+		this.sampleRate = 1; //just in case we can't init audio
 		//then init the audio stream
 		this.nes = nes;
 		this.cpu = cpu;
@@ -99,21 +98,22 @@ public class APU {
 		return lookup;
 	}
 
-	public final synchronized void setParameters() {
+	public final synchronized void setParameters()
+	{
 		Mapper.TVType tvtype = cpuram.mapper.getTVType();
 		soundFiltering = PrefsSingleton.getInstance().getBoolean("soundFiltering", true);
-		samplerate = PrefsSingleton.getInstance().getInt("sampleRate", 44100);
+		sampleRate = PrefsSingleton.getInstance().getInt("sampleRate", 44100);
 		if (audioOutput != null) {
 			audioOutput.destroy();
 		}
 		try {
-			audioOutput = new SwingAudioImpl(samplerate, tvtype);
+			audioOutput = new SwingAudioImpl(sampleRate, tvtype);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		if (PrefsSingleton.getInstance().getBoolean("showScope", false)) {
-			audioOutput = new Oscilloscope(audioOutput);
+			audioOutput = new OscilloScope(audioOutput);
 		}
 		//pick the appropriate pitches and lengths for NTSC or PAL
 		switch (tvtype) {
@@ -122,7 +122,7 @@ public class APU {
 				this.dmcperiods = new int[]{428, 380, 340, 320, 286, 254, 226, 214, 190, 160, 142, 128, 106, 84, 72, 54};
 				this.noiseperiod = new int[]{4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068};
 				this.framectrreload = 7456;
-				cyclespersample = 1789773.0 / samplerate;
+				cyclespersample = 1789773.0 / sampleRate;
 				cyclesperframe = 29781;
 				break;
 
@@ -130,11 +130,11 @@ public class APU {
 				this.dmcperiods = new int[]{428, 380, 340, 320, 286, 254, 226, 214, 190, 160, 142, 128, 106, 84, 72, 54};
 				this.noiseperiod = new int[]{4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068};
 				this.framectrreload = 7456;
-				cyclespersample = 1773448.0 / samplerate;
+				cyclespersample = 1773448.0 / sampleRate;
 				cyclesperframe = 35469;
 				break;
 			case PAL:
-				cyclespersample = 1662607.0 / samplerate;
+				cyclespersample = 1662607.0 / sampleRate;
 				this.dmcperiods = new int[]{398, 354, 316, 298, 276, 236, 210, 198, 176, 148, 132, 118, 98, 78, 66, 50};
 				this.noiseperiod = new int[]{4, 8, 14, 30, 60, 88, 118, 148, 188, 236, 354, 472, 708, 944, 1890, 3778};
 				this.framectrreload = 8312;
@@ -217,7 +217,7 @@ public class APU {
 				//length counter 1 halt
 				lenctrHalt[0] = ((data & (utils.BIT5)) != 0);
 				// pulse 1 duty cycle
-				timers[0].setduty(DUTYLOOKUP[data >> 6]);
+				timers[0].setDuty(DUTYLOOKUP[data >> 6]);
 				// and envelope
 				envConstVolume[0] = ((data & (utils.BIT4)) != 0);
 				envelopeValue[0] = data & 15;
@@ -237,14 +237,14 @@ public class APU {
 				break;
 			case 0x2:
 				// pulse 1 timer low bit
-				timers[0].setperiod((timers[0].getperiod() & 0xfe00) + (data << 1));
+				timers[0].setPeriod((timers[0].getPeriod() & 0xfe00) + (data << 1));
 				break;
 			case 0x3:
 				// length counter load, timer 1 high bits
 				if (lenCtrEnable[0]) {
 					lengthctr[0] = lenctrload[data >> 3];
 				}
-				timers[0].setperiod((timers[0].getperiod() & 0x1ff) + ((data & 7) << 9));
+				timers[0].setPeriod((timers[0].getPeriod() & 0x1ff) + ((data & 7) << 9));
 				// sequencer restarted
 				timers[0].reset();
 				//envelope also restarted
@@ -254,7 +254,7 @@ public class APU {
 				//length counter 2 halt
 				lenctrHalt[1] = ((data & (utils.BIT5)) != 0);
 				// pulse 2 duty cycle
-				timers[1].setduty(DUTYLOOKUP[data >> 6]);
+				timers[1].setDuty(DUTYLOOKUP[data >> 6]);
 				// and envelope
 				envConstVolume[1] = ((data & (utils.BIT4)) != 0);
 				envelopeValue[1] = data & 15;
@@ -274,13 +274,13 @@ public class APU {
 				break;
 			case 0x6:
 				// pulse 2 timer low bit
-				timers[1].setperiod((timers[1].getperiod() & 0xfe00) + (data << 1));
+				timers[1].setPeriod((timers[1].getPeriod() & 0xfe00) + (data << 1));
 				break;
 			case 0x7:
 				if (lenCtrEnable[1]) {
 					lengthctr[1] = lenctrload[data >> 3];
 				}
-				timers[1].setperiod((timers[1].getperiod() & 0x1ff) + ((data & 7) << 9));
+				timers[1].setPeriod((timers[1].getPeriod() & 0x1ff) + ((data & 7) << 9));
 				// sequencer restarted
 				timers[1].reset();
 				//envelope also restarted
@@ -296,7 +296,7 @@ public class APU {
 				break;
 			case 0xA:
 				// triangle low bits of timer
-				timers[2].setperiod((((timers[2].getperiod() * 1) & 0xff00) + data));
+				timers[2].setPeriod((((timers[2].getPeriod() * 1) & 0xff00) + data));
 				break;
 			case 0xB:
 				// triangle length counter load
@@ -304,7 +304,7 @@ public class APU {
 				if (lenCtrEnable[2]) {
 					lengthctr[2] = lenctrload[data >> 3];
 				}
-				timers[2].setperiod((((timers[2].getperiod() * 1) & 0xff) + ((data & 7) << 8)));
+				timers[2].setPeriod((((timers[2].getPeriod() * 1) & 0xff) + ((data & 7) << 8)));
 				linctrflag = true;
 				break;
 			case 0xC:
@@ -317,8 +317,8 @@ public class APU {
 			case 0xD:
 				break;
 			case 0xE:
-				timers[3].setduty(((data & (utils.BIT7)) != 0) ? 6 : 1);
-				timers[3].setperiod(noiseperiod[data & 15]);
+				timers[3].setDuty(((data & (utils.BIT7)) != 0) ? 6 : 1);
+				timers[3].setPeriod(noiseperiod[data & 15]);
 				break;
 			case 0xF:
 				//noise length counter load, envelope restart
@@ -478,10 +478,10 @@ public class APU {
 
 	private int getOutputLevel() {
 		int vol;
-		vol = SQUARELOOKUP[volume[0] * timers[0].getval()
-				+ volume[1] * timers[1].getval()];
-		vol += TNDLOOKUP[3 * timers[2].getval()
-				+ 2 * volume[3] * timers[3].getval()
+		vol = SQUARELOOKUP[volume[0] * timers[0].getVal()
+				+ volume[1] * timers[1].getVal()];
+		vol += TNDLOOKUP[3 * timers[2].getVal()
+				+ 2 * volume[3] * timers[3].getVal()
 				+ dmcvalue];
 		if (!expnSound.isEmpty()) {
 			vol *= 0.8;
@@ -665,7 +665,7 @@ public class APU {
 				sweeppos[i] = sweepperiod[i];
 			}
 			++sweeppos[i];
-			final int rawperiod = (timers[i].getperiod() >> 1);
+			final int rawperiod = (timers[i].getPeriod() >> 1);
 			int shiftedperiod = (rawperiod >> sweepshift[i]);
 			if (sweepnegate[i]) {
 				//invert bits of period
@@ -679,7 +679,7 @@ public class APU {
 			} else if (sweepenable[i] && (sweepshift[i] != 0) && lengthctr[i] > 0
 					&& sweeppos[i] > sweepperiod[i]) {
 				sweeppos[i] = 0;
-				timers[i].setperiod(shiftedperiod << 1);
+				timers[i].setPeriod(shiftedperiod << 1);
 			}
 		}
 	}

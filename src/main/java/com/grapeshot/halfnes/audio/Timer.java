@@ -5,19 +5,26 @@
 package com.grapeshot.halfnes.audio;
 
 public abstract class Timer {
-
 	protected int period;
 	protected int position;
 
-	public final int getperiod() {
+
+	protected Timer(int period, int position)
+	{
+		this.period = period;
+		this.position = position;
+	}
+
+	public final int getPeriod()
+	{
 		return period;
 	}
 
-	public abstract void setperiod(final int newperiod);
+	public abstract void setPeriod(final int period);
 
-	public abstract void setduty(int duty);
+	public abstract void setDuty(int duty);
 
-	public abstract void setduty(int[] duty);
+	public abstract void setDuty(int[] duty);
 
 	public abstract void reset();
 
@@ -25,5 +32,5 @@ public abstract class Timer {
 
 	public abstract void clock(final int cycles);
 
-	public abstract int getval();
+	public abstract int getVal();
 }
