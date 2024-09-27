@@ -12,12 +12,13 @@ public class FFT {
 //note to self: works, des not give sensible results when plotted
 	//on a linear scale! why? you should know this. hearing's logarithmic.
 
-	int n, m;
+	private int n, m;
 	// Lookup tables. Only need to recompute when size of FFT changes.
-	double[] cos;
-	double[] sin;
+	private double[] cos;
+	private double[] sin;
 
-	public FFT(int n) {
+	public FFT(int n)
+	{
 		this.n = n;
 		this.m = (int) (Math.log(n) / Math.log(2));
 
@@ -37,7 +38,8 @@ public class FFT {
 
 	}
 
-	public void fft(double[] x, double[] y) {
+	public void fft(double[] x, double[] y)
+	{
 		int i, j, k, n1, n2, a;
 		double c, s, t1, t2;
 

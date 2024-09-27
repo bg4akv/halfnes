@@ -10,11 +10,30 @@
  */
 package com.grapeshot.halfnes.ui;
 
+import java.awt.Component;
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.prefs.BackingStoreException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.prefs.Preferences;
+
+import javafx.util.Pair;
+
+import javax.swing.ButtonGroup;
+import javax.swing.GroupLayout;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.LayoutStyle;
+import javax.swing.SwingConstants;
 
 import com.grapeshot.halfnes.PrefsSingleton;
 
@@ -22,58 +41,85 @@ import com.grapeshot.halfnes.PrefsSingleton;
  *
  * @author Andrew
  */
-public class ControlsDialog extends javax.swing.JDialog {
+public class ControlsDialog extends JDialog {
+	private ButtonGroup buttonGroup1;
+	private JButton jButton1;
+	private JButton jButton2;
+	private JButton jButtonCancel;
+	private JButton jButtonOK;
+	private JTextField jField1A;
+	private JTextField jField1B;
+	private JTextField jField1Down;
+	private JTextField jField1Left;
+	private JTextField jField1Right;
+	private JTextField jField1Select;
+	private JTextField jField1Start;
+	private JTextField jField1Up;
+	private JTextField jField2A;
+	private JTextField jField2B;
+	private JTextField jField2Down;
+	private JTextField jField2Left;
+	private JTextField jField2Right;
+	private JTextField jField2Select;
+	private JTextField jField2Start;
+	private JTextField jField2Up;
+	private JLabel jLabel1;
+	private JLabel jLabel10;
+	private JLabel jLabel11;
+	private JLabel jLabel12;
+	private JLabel jLabel13;
+	private JLabel jLabel16;
+	private JLabel jLabel3;
+	private JLabel jLabel4;
+	private JLabel jLabel5;
+	private JLabel jLabel6;
+	private JLabel jLabel7;
+	private JLabel jLabel8;
+	private JLabel jLabel9;
+	private JLabel jLabelCtrl1;
+	private JLabel jLabelCtrl2;
 
-	private int[][] keys;
+	private final Preferences prefs = PrefsSingleton.getInstance();
 	private boolean okClicked = false;
 
-	/**
-	 * Creates new form ControlsDialog
-	 */
-	public ControlsDialog(java.awt.Frame parent) {
+	private final Map<String, Integer> map = new HashMap<String, Integer>();
+
+
+	public ControlsDialog(Frame parent)
+	{
 		super(parent, true);
 		if (parent != null) {
 			setLocation(parent.getLocation());
 		}
 
-		Preferences prefs = PrefsSingleton.getInstance();
-		int[][] keys = {{prefs.getInt("keyUp1", KeyEvent.VK_UP),
-				prefs.getInt("keyDown1", KeyEvent.VK_DOWN),
-				prefs.getInt("keyLeft1", KeyEvent.VK_LEFT),
-				prefs.getInt("keyRight1", KeyEvent.VK_RIGHT),
-				prefs.getInt("keyA1", KeyEvent.VK_X),
-				prefs.getInt("keyB1", KeyEvent.VK_Z),
-				prefs.getInt("keySelect1", KeyEvent.VK_SHIFT),
-				prefs.getInt("keyStart1", KeyEvent.VK_ENTER),}, {
-				prefs.getInt("keyUp2", KeyEvent.VK_W),
-				prefs.getInt("keyDown2", KeyEvent.VK_S),
-				prefs.getInt("keyLeft2", KeyEvent.VK_A),
-				prefs.getInt("keyRight2", KeyEvent.VK_D),
-				prefs.getInt("keyA2", KeyEvent.VK_G),
-				prefs.getInt("keyB2", KeyEvent.VK_F),
-				prefs.getInt("keySelect2", KeyEvent.VK_R),
-				prefs.getInt("keyStart2", KeyEvent.VK_T)}};
-		this.keys = keys;
-		initComponents();
-		this.setTitle("HalfNES Controller Settings");
-		//set all of the text boxes
-		jField1Up.setText(KeyEvent.getKeyText(keys[0][0]));
-		jField1Down.setText(KeyEvent.getKeyText(keys[0][1]));
-		jField1Left.setText(KeyEvent.getKeyText(keys[0][2]));
-		jField1Right.setText(KeyEvent.getKeyText(keys[0][3]));
-		jField1A.setText(KeyEvent.getKeyText(keys[0][4]));
-		jField1B.setText(KeyEvent.getKeyText(keys[0][5]));
-		jField1Select.setText(KeyEvent.getKeyText(keys[0][6]));
-		jField1Start.setText(KeyEvent.getKeyText(keys[0][7]));
+		for (Entry<String, Pair<Integer, Integer>> entry : ControllerKeyListener.keyMap.entrySet()) {
+			String key = entry.getKey();
+			Pair<Integer, Integer> value = entry.getValue();
+			map.put(key, prefs.getInt(key, value.getKey()));
+		}
 
-		jField2Up.setText(KeyEvent.getKeyText(keys[1][0]));
-		jField2Down.setText(KeyEvent.getKeyText(keys[1][1]));
-		jField2Left.setText(KeyEvent.getKeyText(keys[1][2]));
-		jField2Right.setText(KeyEvent.getKeyText(keys[1][3]));
-		jField2A.setText(KeyEvent.getKeyText(keys[1][4]));
-		jField2B.setText(KeyEvent.getKeyText(keys[1][5]));
-		jField2Select.setText(KeyEvent.getKeyText(keys[1][6]));
-		jField2Start.setText(KeyEvent.getKeyText(keys[1][7]));
+		setTitle("HalfNES Controller Settings");
+		initComponents();
+
+		//set all of the text boxes
+		jField1Up.setText(KeyEvent.getKeyText(map.get(ControllerKeyListener.KEY_CTRL1_KEYUP)));
+		jField1Down.setText(KeyEvent.getKeyText(map.get(ControllerKeyListener.KEY_CTRL1_KEYDN)));
+		jField1Left.setText(KeyEvent.getKeyText(map.get(ControllerKeyListener.KEY_CTRL1_KEYLF)));
+		jField1Right.setText(KeyEvent.getKeyText(map.get(ControllerKeyListener.KEY_CTRL1_KEYRT)));
+		jField1A.setText(KeyEvent.getKeyText(map.get(ControllerKeyListener.KEY_CTRL1_KEYA)));
+		jField1B.setText(KeyEvent.getKeyText(map.get(ControllerKeyListener.KEY_CTRL1_KEYB)));
+		jField1Select.setText(KeyEvent.getKeyText(map.get(ControllerKeyListener.KEY_CTRL1_KEYSL)));
+		jField1Start.setText(KeyEvent.getKeyText(map.get(ControllerKeyListener.KEY_CTRL1_KEYST)));
+
+		jField2Up.setText(KeyEvent.getKeyText(map.get(ControllerKeyListener.KEY_CTRL2_KEYUP)));
+		jField2Down.setText(KeyEvent.getKeyText(map.get(ControllerKeyListener.KEY_CTRL2_KEYDN)));
+		jField2Left.setText(KeyEvent.getKeyText(map.get(ControllerKeyListener.KEY_CTRL2_KEYLF)));
+		jField2Right.setText(KeyEvent.getKeyText(map.get(ControllerKeyListener.KEY_CTRL2_KEYRT)));
+		jField2A.setText(KeyEvent.getKeyText(map.get(ControllerKeyListener.KEY_CTRL2_KEYA)));
+		jField2B.setText(KeyEvent.getKeyText(map.get(ControllerKeyListener.KEY_CTRL2_KEYB)));
+		jField2Select.setText(KeyEvent.getKeyText(map.get(ControllerKeyListener.KEY_CTRL2_KEYSL)));
+		jField2Start.setText(KeyEvent.getKeyText(map.get(ControllerKeyListener.KEY_CTRL2_KEYST)));
+
 		//set the controller text if we've detected some
 		String ctrl1 = prefs.get("controller0", "");
 		String ctrl2 = prefs.get("controller1", "");
@@ -87,250 +133,242 @@ public class ControlsDialog extends javax.swing.JDialog {
 		jButtonCancel.setActionCommand("Cancel");
 	}
 
-	/**
-	 * This method is called from within the constructor to initialize the form.
-	 * WARNING: Do NOT modify this code. The content of this method is always
-	 * regenerated by the Form Editor.
-	 */
-	@SuppressWarnings("unchecked")
-	// <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-	private void initComponents() {
 
-		buttonGroup1 = new javax.swing.ButtonGroup();
-		jLabel3 = new javax.swing.JLabel();
-		jLabel4 = new javax.swing.JLabel();
-		jLabel5 = new javax.swing.JLabel();
-		jLabel6 = new javax.swing.JLabel();
-		jLabel7 = new javax.swing.JLabel();
-		jLabel8 = new javax.swing.JLabel();
-		jLabel9 = new javax.swing.JLabel();
-		jLabel10 = new javax.swing.JLabel();
-		jLabel11 = new javax.swing.JLabel();
-		jLabel12 = new javax.swing.JLabel();
-		jLabel13 = new javax.swing.JLabel();
-		jField1Up = new javax.swing.JTextField();
-		jField1Down = new javax.swing.JTextField();
-		jField1Right = new javax.swing.JTextField();
-		jField1Left = new javax.swing.JTextField();
-		jField1Start = new javax.swing.JTextField();
-		jField1Select = new javax.swing.JTextField();
-		jField1B = new javax.swing.JTextField();
-		jField1A = new javax.swing.JTextField();
-		jField2Up = new javax.swing.JTextField();
-		jField2Down = new javax.swing.JTextField();
-		jField2Left = new javax.swing.JTextField();
-		jField2Right = new javax.swing.JTextField();
-		jField2A = new javax.swing.JTextField();
-		jField2B = new javax.swing.JTextField();
-		jField2Select = new javax.swing.JTextField();
-		jField2Start = new javax.swing.JTextField();
-		jButtonCancel = new javax.swing.JButton();
-		jButtonOK = new javax.swing.JButton();
-		jLabel16 = new javax.swing.JLabel();
-		jLabel1 = new javax.swing.JLabel();
-		jLabelCtrl1 = new javax.swing.JLabel();
-		jButton1 = new javax.swing.JButton();
-		jButton2 = new javax.swing.JButton();
-		jLabelCtrl2 = new javax.swing.JLabel();
+	private void initComponents()
+	{
+		buttonGroup1 = new ButtonGroup();
+		jLabel3 = new JLabel();
+		jLabel4 = new JLabel();
+		jLabel5 = new JLabel();
+		jLabel6 = new JLabel();
+		jLabel7 = new JLabel();
+		jLabel8 = new JLabel();
+		jLabel9 = new JLabel();
+		jLabel10 = new JLabel();
+		jLabel11 = new JLabel();
+		jLabel12 = new JLabel();
+		jLabel13 = new JLabel();
+		jField1Up = new JTextField();
+		jField1Down = new JTextField();
+		jField1Right = new JTextField();
+		jField1Left = new JTextField();
+		jField1Start = new JTextField();
+		jField1Select = new JTextField();
+		jField1B = new JTextField();
+		jField1A = new JTextField();
+		jField2Up = new JTextField();
+		jField2Down = new JTextField();
+		jField2Left = new JTextField();
+		jField2Right = new JTextField();
+		jField2A = new JTextField();
+		jField2B = new JTextField();
+		jField2Select = new JTextField();
+		jField2Start = new JTextField();
+		jButtonCancel = new JButton();
+		jButtonOK = new JButton();
+		jLabel16 = new JLabel();
+		jLabel1 = new JLabel();
+		jLabelCtrl1 = new JLabel();
+		jButton1 = new JButton();
+		jButton2 = new JButton();
+		jLabelCtrl2 = new JLabel();
 
-		setModalityType(java.awt.Dialog.ModalityType.APPLICATION_MODAL);
-		setName("ControlsDialog"); // NOI18N
+
+		setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+		setName("ControlsDialog");
 		setResizable(false);
 
-		jLabel3.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-		jLabel3.setText("Keybindings:"); // NOI18N
+		jLabel3.setFont(new Font("Tahoma", 1, 11));
+		jLabel3.setText("Keybindings:");
 
-		jLabel4.setText("Controller 1"); // NOI18N
+		jLabel4.setText("Controller 1");
+		jLabel5.setText("Controller 2");
 
-		jLabel5.setText("Controller 2"); // NOI18N
+		jLabel6.setText("Up");
+		jLabel7.setText("Down");
+		jLabel8.setText("Left");
+		jLabel9.setText("Right");
+		jLabel10.setText("A");
+		jLabel11.setText("B");
+		jLabel12.setText("Select");
+		jLabel13.setText("Start");
 
-		jLabel6.setText("Up"); // NOI18N
-
-		jLabel7.setText("Down"); // NOI18N
-
-		jLabel8.setText("Left"); // NOI18N
-
-		jLabel9.setText("Right"); // NOI18N
-
-		jLabel10.setText("A"); // NOI18N
-
-		jLabel11.setText("B"); // NOI18N
-
-		jLabel12.setText("Select"); // NOI18N
-
-		jLabel13.setText("Start"); // NOI18N
-
-		jField1Up.setMinimumSize(new java.awt.Dimension(120, 20));
-		jField1Up.addActionListener(new java.awt.event.ActionListener() {
+		jField1Up.setMinimumSize(new Dimension(120, 20));
+		jField1Up.addKeyListener(new KeyAdapter() {
 			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				jField2StartActionPerformed(evt);
-			}
-		});
-		jField1Up.addKeyListener(new java.awt.event.KeyAdapter() {
-			@Override
-			public void keyReleased(java.awt.event.KeyEvent evt) {
-				jField1UpKeyReleased(evt);
+			public void keyReleased(KeyEvent evt)
+			{
+				keyAction(evt, ControllerKeyListener.KEY_CTRL1_KEYUP, jField1Up);
 			}
 		});
 
-		jField1Down.setMinimumSize(new java.awt.Dimension(120, 20));
-		jField1Down.addActionListener(new java.awt.event.ActionListener() {
+		jField1Down.setMinimumSize(new Dimension(120, 20));
+		jField1Down.addKeyListener(new KeyAdapter() {
 			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				jField2StartActionPerformed(evt);
-			}
-		});
-		jField1Down.addKeyListener(new java.awt.event.KeyAdapter() {
-			@Override
-			public void keyReleased(java.awt.event.KeyEvent evt) {
-				jField1DownKeyReleased(evt);
+			public void keyReleased(KeyEvent evt)
+			{
+				keyAction(evt, ControllerKeyListener.KEY_CTRL1_KEYDN, jField1Down);
 			}
 		});
 
-		jField1Right.setMinimumSize(new java.awt.Dimension(120, 20));
-		jField1Right.addActionListener(new java.awt.event.ActionListener() {
+		jField1Right.setMinimumSize(new Dimension(120, 20));
+		jField1Right.addKeyListener(new KeyAdapter() {
 			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				jField2StartActionPerformed(evt);
-			}
-		});
-		jField1Right.addKeyListener(new java.awt.event.KeyAdapter() {
-			@Override
-			public void keyReleased(java.awt.event.KeyEvent evt) {
-				jField1RightKeyReleased(evt);
+			public void keyReleased(KeyEvent evt)
+			{
+				keyAction(evt, ControllerKeyListener.KEY_CTRL1_KEYRT, jField1Right);
 			}
 		});
 
-		jField1Left.setMinimumSize(new java.awt.Dimension(120, 20));
-		jField1Left.addActionListener(new java.awt.event.ActionListener() {
+		jField1Left.setMinimumSize(new Dimension(120, 20));
+		jField1Left.addKeyListener(new KeyAdapter() {
 			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				jField2StartActionPerformed(evt);
-			}
-		});
-		jField1Left.addKeyListener(new java.awt.event.KeyAdapter() {
-			@Override
-			public void keyReleased(java.awt.event.KeyEvent evt) {
-				jField1LeftKeyReleased(evt);
+			public void keyReleased(KeyEvent evt)
+			{
+				keyAction(evt, ControllerKeyListener.KEY_CTRL1_KEYLF, jField1Left);
 			}
 		});
 
-		jField1Start.setMinimumSize(new java.awt.Dimension(120, 20));
-		jField1Start.addKeyListener(new java.awt.event.KeyAdapter() {
+		jField1Start.setMinimumSize(new Dimension(120, 20));
+		jField1Start.addKeyListener(new KeyAdapter() {
 			@Override
-			public void keyReleased(java.awt.event.KeyEvent evt) {
-				jField1StartKeyReleased(evt);
+			public void keyReleased(KeyEvent evt)
+			{
+				keyAction(evt, ControllerKeyListener.KEY_CTRL1_KEYST, jField1Start);
 			}
 		});
 
-		jField1Select.setMinimumSize(new java.awt.Dimension(120, 20));
-		jField1Select.addKeyListener(new java.awt.event.KeyAdapter() {
+		jField1Select.setMinimumSize(new Dimension(120, 20));
+		jField1Select.addKeyListener(new KeyAdapter() {
 			@Override
-			public void keyReleased(java.awt.event.KeyEvent evt) {
-				jField1SelectKeyReleased(evt);
+			public void keyReleased(KeyEvent evt)
+			{
+				keyAction(evt, ControllerKeyListener.KEY_CTRL1_KEYSL, jField1Select);
 			}
 		});
 
-		jField1B.setMinimumSize(new java.awt.Dimension(120, 20));
-		jField1B.addKeyListener(new java.awt.event.KeyAdapter() {
+		jField1B.setMinimumSize(new Dimension(120, 20));
+		jField1B.addKeyListener(new KeyAdapter() {
 			@Override
-			public void keyReleased(java.awt.event.KeyEvent evt) {
-				jField1BKeyReleased(evt);
+			public void keyReleased(KeyEvent evt)
+			{
+				keyAction(evt, ControllerKeyListener.KEY_CTRL1_KEYB, jField1B);
 			}
 		});
 
-		jField1A.setMinimumSize(new java.awt.Dimension(120, 20));
-		jField1A.addKeyListener(new java.awt.event.KeyAdapter() {
+		jField1A.setMinimumSize(new Dimension(120, 20));
+		jField1A.addKeyListener(new KeyAdapter() {
 			@Override
-			public void keyReleased(java.awt.event.KeyEvent evt) {
-				jField1AKeyReleased(evt);
+			public void keyReleased(KeyEvent evt)
+			{
+				keyAction(evt, ControllerKeyListener.KEY_CTRL1_KEYA, jField1A);
 			}
 		});
 
-		jField2Up.setMinimumSize(new java.awt.Dimension(120, 20));
-		jField2Up.addKeyListener(new java.awt.event.KeyAdapter() {
+		jField2Up.setMinimumSize(new Dimension(120, 20));
+		jField2Up.addKeyListener(new KeyAdapter() {
 			@Override
-			public void keyReleased(java.awt.event.KeyEvent evt) {
-				jField2UpKeyReleased(evt);
+			public void keyReleased(KeyEvent evt)
+			{
+				keyAction(evt, ControllerKeyListener.KEY_CTRL2_KEYUP, jField2Up);
 			}
 		});
 
-		jField2Down.setMinimumSize(new java.awt.Dimension(120, 20));
-		jField2Down.addKeyListener(new java.awt.event.KeyAdapter() {
+		jField2Down.setMinimumSize(new Dimension(120, 20));
+		jField2Down.addKeyListener(new KeyAdapter() {
 			@Override
-			public void keyReleased(java.awt.event.KeyEvent evt) {
-				jField2DownKeyReleased(evt);
+			public void keyReleased(KeyEvent evt)
+			{
+				keyAction(evt, ControllerKeyListener.KEY_CTRL2_KEYDN, jField2Down);
 			}
 		});
 
-		jField2Left.setMinimumSize(new java.awt.Dimension(120, 20));
-		jField2Left.addKeyListener(new java.awt.event.KeyAdapter() {
+		jField2Left.setMinimumSize(new Dimension(120, 20));
+		jField2Left.addKeyListener(new KeyAdapter() {
 			@Override
-			public void keyReleased(java.awt.event.KeyEvent evt) {
-				jField2LeftKeyReleased(evt);
+			public void keyReleased(KeyEvent evt)
+			{
+				keyAction(evt, ControllerKeyListener.KEY_CTRL2_KEYLF, jField2Left);
 			}
 		});
 
-		jField2Right.setMinimumSize(new java.awt.Dimension(120, 20));
-		jField2Right.addKeyListener(new java.awt.event.KeyAdapter() {
+		jField2Right.setMinimumSize(new Dimension(120, 20));
+		jField2Right.addKeyListener(new KeyAdapter() {
 			@Override
-			public void keyReleased(java.awt.event.KeyEvent evt) {
-				jField2RightKeyReleased(evt);
+			public void keyReleased(KeyEvent evt)
+			{
+				keyAction(evt, ControllerKeyListener.KEY_CTRL2_KEYRT, jField2Right);
 			}
 		});
 
-		jField2A.setMinimumSize(new java.awt.Dimension(120, 20));
-		jField2A.addKeyListener(new java.awt.event.KeyAdapter() {
+		jField2A.setMinimumSize(new Dimension(120, 20));
+		jField2A.addKeyListener(new KeyAdapter() {
 			@Override
-			public void keyReleased(java.awt.event.KeyEvent evt) {
-				jField2AKeyReleased(evt);
+			public void keyReleased(KeyEvent evt)
+			{
+				keyAction(evt, ControllerKeyListener.KEY_CTRL2_KEYA, jField2A);
 			}
 		});
 
-		jField2B.setMinimumSize(new java.awt.Dimension(120, 20));
-		jField2B.addKeyListener(new java.awt.event.KeyAdapter() {
+		jField2B.setMinimumSize(new Dimension(120, 20));
+		jField2B.addKeyListener(new KeyAdapter() {
 			@Override
-			public void keyReleased(java.awt.event.KeyEvent evt) {
-				jField2BKeyReleased(evt);
+			public void keyReleased(KeyEvent evt)
+			{
+				keyAction(evt, ControllerKeyListener.KEY_CTRL2_KEYB, jField2B);
 			}
 		});
 
-		jField2Select.setMinimumSize(new java.awt.Dimension(120, 20));
-		jField2Select.addKeyListener(new java.awt.event.KeyAdapter() {
+		jField2Select.setMinimumSize(new Dimension(120, 20));
+		jField2Select.addKeyListener(new KeyAdapter() {
 			@Override
-			public void keyReleased(java.awt.event.KeyEvent evt) {
-				jField2SelectKeyReleased(evt);
+			public void keyReleased(KeyEvent evt)
+			{
+				keyAction(evt, ControllerKeyListener.KEY_CTRL2_KEYSL, jField2Select);
 			}
 		});
 
-		jField2Start.setMinimumSize(new java.awt.Dimension(120, 20));
-		jField2Start.addKeyListener(new java.awt.event.KeyAdapter() {
+		jField2Start.setMinimumSize(new Dimension(120, 20));
+		jField2Start.addKeyListener(new KeyAdapter() {
 			@Override
-			public void keyReleased(java.awt.event.KeyEvent evt) {
-				jField2StartKeyReleased(evt);
+			public void keyReleased(KeyEvent evt)
+			{
+				keyAction(evt, ControllerKeyListener.KEY_CTRL2_KEYST, jField2Start);
 			}
 		});
 
-		jButtonCancel.setText("Cancel"); // NOI18N
-		jButtonCancel.addActionListener(new java.awt.event.ActionListener() {
+		jButtonCancel.setText("Cancel");
+		jButtonCancel.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				jButtonCancelActionPerformed(evt);
+			public void actionPerformed(ActionEvent evt)
+			{
+				setVisible(false);
 			}
 		});
 
-		jButtonOK.setText("OK"); // NOI18N
-		jButtonOK.addActionListener(new java.awt.event.ActionListener() {
+		jButtonOK.setText("OK");
+		jButtonOK.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				jButtonOKActionPerformed(evt);
+			public void actionPerformed(ActionEvent evt)
+			{
+				for (Entry<String, Integer> entry : map.entrySet()) {
+					prefs.putInt(entry.getKey(), entry.getValue());
+				}
+
+				try {
+					prefs.flush();
+				} catch (Exception ex) {
+					;
+				}
+
+				okClicked = true;
+				setVisible(false);
 			}
 		});
 
-		jLabel16.setText(" Click in text box and type a key to change that binding."); // NOI18N
+		jLabel16.setText(" Click in text box and type a key to change that binding.");
 
-		jLabel1.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+		jLabel1.setFont(new java.awt.Font("Tahoma", 1, 11));
 		jLabel1.setText("Detected Game Controllers:");
 
 		jLabelCtrl1.setText("No Player 1 controller connected");
@@ -338,43 +376,45 @@ public class ControlsDialog extends javax.swing.JDialog {
 
 		jButton1.setText("Set Buttons");
 		jButton1.setEnabled(false);
-		jButton1.addActionListener(new java.awt.event.ActionListener() {
+		jButton1.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				jButton1ActionPerformed(evt);
+			public void actionPerformed(ActionEvent evt)
+			{
+				;
 			}
 		});
 
 		jButton2.setText("Set Buttons");
 		jButton2.setEnabled(false);
-		jButton2.addActionListener(new java.awt.event.ActionListener() {
+		jButton2.addActionListener(new ActionListener() {
 			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				jButton2ActionPerformed(evt);
+			public void actionPerformed(ActionEvent evt)
+			{
+				;
 			}
 		});
 
 		jLabelCtrl2.setText("No Player 2 controller connected");
 		jLabelCtrl2.setEnabled(false);
 
-		javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+		GroupLayout layout = new GroupLayout(getContentPane());
 		getContentPane().setLayout(layout);
 		layout.setHorizontalGroup(
-			layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+			layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 			.addGroup(layout.createSequentialGroup()
-				.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+				.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 					.addComponent(jLabel1)
 					.addComponent(jLabel16)
 					.addGroup(layout.createSequentialGroup()
 						.addGap(49, 49, 49)
 						.addComponent(jLabel4)
-						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+						.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
 						.addComponent(jLabel5))
 					.addComponent(jLabel3)
 					.addGroup(layout.createSequentialGroup()
 						.addGap(10, 10, 10)
-						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
 							.addComponent(jLabel7)
 							.addComponent(jLabel8)
 							.addComponent(jLabel9)
@@ -383,303 +423,132 @@ public class ControlsDialog extends javax.swing.JDialog {
 							.addComponent(jLabel13)
 							.addComponent(jLabel6)
 							.addComponent(jLabel12))
-						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-							.addComponent(jField1Right, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-							.addComponent(jField1Left, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-							.addComponent(jField1B, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-							.addComponent(jField1A, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-							.addComponent(jField1Start, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-							.addComponent(jField1Select, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-							.addComponent(jField1Up, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-							.addComponent(jField1Down, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE))
-						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-							.addComponent(jField2Select, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-							.addComponent(jField2B, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-							.addComponent(jField2Start, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-							.addComponent(jField2A, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-							.addComponent(jField2Right, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-							.addComponent(jField2Up, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-							.addComponent(jField2Down, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-							.addComponent(jField2Left, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)))
-					.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+						.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+							.addComponent(jField1Right, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)
+							.addComponent(jField1Left, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)
+							.addComponent(jField1B, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)
+							.addComponent(jField1A, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)
+							.addComponent(jField1Start, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)
+							.addComponent(jField1Select, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)
+							.addComponent(jField1Up, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)
+							.addComponent(jField1Down, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE))
+						.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+							.addComponent(jField2Select, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)
+							.addComponent(jField2B, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)
+							.addComponent(jField2Start, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)
+							.addComponent(jField2A, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)
+							.addComponent(jField2Right, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)
+							.addComponent(jField2Up, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)
+							.addComponent(jField2Down, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)
+							.addComponent(jField2Left, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)))
+					.addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
 						.addGroup(layout.createSequentialGroup()
-							.addComponent(jButtonOK, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+							.addComponent(jButtonOK, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)
+							.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
 							.addComponent(jButtonCancel))
 						.addGroup(layout.createSequentialGroup()
-							.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+							.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 								.addComponent(jLabelCtrl1)
 								.addComponent(jLabelCtrl2))
-							.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-							.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+							.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+							.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 								.addComponent(jButton2)
 								.addComponent(jButton1))))))
 		);
 
-		layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jField1A, jField1B, jField1Down, jField1Left, jField1Right, jField1Select, jField1Start, jField1Up, jField2A, jField2B, jField2Down, jField2Left, jField2Right, jField2Select, jField2Start, jField2Up});
+		layout.linkSize(SwingConstants.HORIZONTAL, new java.awt.Component[] {jField1A, jField1B, jField1Down, jField1Left, jField1Right, jField1Select, jField1Start, jField1Up, jField2A, jField2B, jField2Down, jField2Left, jField2Right, jField2Select, jField2Start, jField2Up});
 
 		layout.setVerticalGroup(
-			layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+			layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 			.addGroup(layout.createSequentialGroup()
 				.addComponent(jLabel3)
-				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-				.addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
+				.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+				.addComponent(jLabel16, GroupLayout.PREFERRED_SIZE, 14, GroupLayout.PREFERRED_SIZE)
 				.addGap(11, 11, 11)
-				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 					.addComponent(jLabel4)
 					.addComponent(jLabel5))
-				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-					.addComponent(jField2Up, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+				.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+					.addComponent(jField2Up, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 					.addGroup(layout.createSequentialGroup()
-						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 							.addGroup(layout.createSequentialGroup()
-								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+								.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 									.addComponent(jLabel6)
-									.addComponent(jField1Up, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-									.addComponent(jField1Down, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+									.addComponent(jField1Up, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+								.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+								.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+									.addComponent(jField1Down, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 									.addComponent(jLabel7))
-								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-									.addComponent(jField1Left, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+								.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+								.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+									.addComponent(jField1Left, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 									.addComponent(jLabel8))
-								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-									.addComponent(jField1Right, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+								.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+								.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+									.addComponent(jField1Right, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 									.addComponent(jLabel9)
-									.addComponent(jField2Right, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-								.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-									.addComponent(jField1A, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+									.addComponent(jField2Right, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+								.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+								.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+									.addComponent(jField1A, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 									.addComponent(jLabel10)
-									.addComponent(jField2A, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+									.addComponent(jField2A, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
 							.addGroup(layout.createSequentialGroup()
 								.addGap(31, 31, 31)
-								.addComponent(jField2Down, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-								.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-								.addComponent(jField2Left, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-							.addComponent(jField1B, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+								.addComponent(jField2Down, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+								.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+								.addComponent(jField2Left, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
+						.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+							.addComponent(jField1B, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 							.addComponent(jLabel11)
-							.addComponent(jField2B, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-							.addComponent(jField1Select, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+							.addComponent(jField2B, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+							.addComponent(jField1Select, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 							.addComponent(jLabel12)
-							.addComponent(jField2Select, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-						.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-						.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-							.addComponent(jField1Start, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+							.addComponent(jField2Select, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+							.addComponent(jField1Start, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 							.addComponent(jLabel13)
-							.addComponent(jField2Start, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+							.addComponent(jField2Start, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))))
+				.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
 				.addComponent(jLabel1)
-				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+				.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 					.addComponent(jLabelCtrl1)
 					.addComponent(jButton2))
 				.addGap(12, 12, 12)
-				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 					.addComponent(jLabelCtrl2)
 					.addComponent(jButton1))
-				.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-				.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+				.addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 					.addComponent(jButtonOK)
 					.addComponent(jButtonCancel))
 				.addGap(0, 8, Short.MAX_VALUE))
 		);
 
-		layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jField1A, jField1B, jField1Down, jField1Left, jField1Right, jField1Select, jField1Start, jField1Up, jField2A, jField2B, jField2Down, jField2Left, jField2Right, jField2Select, jField2Start, jField2Up});
+		layout.linkSize(SwingConstants.VERTICAL, new Component[] {jField1A, jField1B, jField1Down, jField1Left, jField1Right, jField1Select, jField1Start, jField1Up, jField2A, jField2B, jField2Down, jField2Left, jField2Right, jField2Select, jField2Start, jField2Up});
 
 		pack();
-	}// </editor-fold>//GEN-END:initComponents
+	}
 
-	private void jButtonCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCancelActionPerformed
-		if ("Cancel".equals(evt.getActionCommand())) {
-			this.setVisible(false);
-		}
-	}//GEN-LAST:event_jButtonCancelActionPerformed
 
-	private void jButtonOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOKActionPerformed
-		//	if ("OK".equals(evt.getActionCommand())) {
-		//here we go... save everything and hide the window
-		Preferences prefs = PrefsSingleton.getInstance();
-		prefs.putInt("keyUp1", keys[0][0]);
-		prefs.putInt("keyDown1", keys[0][1]);
-		prefs.putInt("keyLeft1", keys[0][2]);
-		prefs.putInt("keyRight1", keys[0][3]);
-		prefs.putInt("keyA1", keys[0][4]);
-		prefs.putInt("keyB1", keys[0][5]);
-		prefs.putInt("keySelect1", keys[0][6]);
-		prefs.putInt("keyStart1", keys[0][7]);
-		prefs.putInt("keyUp2", keys[1][0]);
-		prefs.putInt("keyDown2", keys[1][1]);
-		prefs.putInt("keyLeft2", keys[1][2]);
-		prefs.putInt("keyRight2", keys[1][3]);
-		prefs.putInt("keyA2", keys[1][4]);
-		prefs.putInt("keyB2", keys[1][5]);
-		prefs.putInt("keySelect2", keys[1][6]);
-		prefs.putInt("keyStart2", keys[1][7]);
-		try {
-			prefs.flush();
-		} catch (BackingStoreException ex) {
-			Logger.getLogger(ControlsDialog.class.getName()).log(Level.SEVERE, null, ex);
-		}
-		okClicked = true;
-		this.setVisible(false);
-		//   }
-	}//GEN-LAST:event_jButtonOKActionPerformed
-	public boolean okClicked() {
+	public boolean okClicked()
+	{
 		return okClicked;
 	}
-	private void jField1UpKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jField1UpKeyReleased
-		int k = evt.getKeyCode();
-		jField1Up.setText(KeyEvent.getKeyText(k));
-		keys[0][0] = k;
-	}//GEN-LAST:event_jField1UpKeyReleased
 
-	private void jField1DownKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jField1DownKeyReleased
-		int k = evt.getKeyCode();
-		jField1Down.setText(KeyEvent.getKeyText(k));
-		keys[0][1] = k;
-	}//GEN-LAST:event_jField1DownKeyReleased
-
-	private void jField1LeftKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jField1LeftKeyReleased
-		int k = evt.getKeyCode();
-		jField1Left.setText(KeyEvent.getKeyText(k));
-		keys[0][2] = k;
-	}//GEN-LAST:event_jField1LeftKeyReleased
-
-	private void jField1RightKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jField1RightKeyReleased
-		int k = evt.getKeyCode();
-		jField1Right.setText(KeyEvent.getKeyText(k));
-		keys[0][3] = k;
-	}//GEN-LAST:event_jField1RightKeyReleased
-
-	private void jField2StartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jField2StartActionPerformed
-		// TODO add your handling code here:
-	}//GEN-LAST:event_jField2StartActionPerformed
-
-	private void jField1AKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jField1AKeyReleased
-		int k = evt.getKeyCode();
-		jField1A.setText(KeyEvent.getKeyText(k));
-		keys[0][4] = k;
-	}//GEN-LAST:event_jField1AKeyReleased
-
-	private void jField1BKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jField1BKeyReleased
-		int k = evt.getKeyCode();
-		jField1B.setText(KeyEvent.getKeyText(k));
-		keys[0][5] = k;
-	}//GEN-LAST:event_jField1BKeyReleased
-
-	private void jField1SelectKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jField1SelectKeyReleased
-		int k = evt.getKeyCode();
-		jField1Select.setText(KeyEvent.getKeyText(k));
-		keys[0][6] = k;
-	}//GEN-LAST:event_jField1SelectKeyReleased
-
-	private void jField1StartKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jField1StartKeyReleased
-		int k = evt.getKeyCode();
-		jField1Start.setText(KeyEvent.getKeyText(k));
-		keys[0][7] = k;
-	}//GEN-LAST:event_jField1StartKeyReleased
-
-	private void jField2UpKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jField2UpKeyReleased
-		int k = evt.getKeyCode();
-		jField2Up.setText(KeyEvent.getKeyText(k));
-		keys[1][0] = k;
-	}//GEN-LAST:event_jField2UpKeyReleased
-
-	private void jField2StartKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jField2StartKeyReleased
-		int k = evt.getKeyCode();
-		jField2Start.setText(KeyEvent.getKeyText(k));
-		keys[1][7] = k;
-	}//GEN-LAST:event_jField2StartKeyReleased
-
-	private void jField2DownKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jField2DownKeyReleased
-		int k = evt.getKeyCode();
-		jField2Down.setText(KeyEvent.getKeyText(k));
-		keys[1][1] = k;
-	}//GEN-LAST:event_jField2DownKeyReleased
-
-	private void jField2LeftKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jField2LeftKeyReleased
-		int k = evt.getKeyCode();
-		jField2Left.setText(KeyEvent.getKeyText(k));
-		keys[1][2] = k;
-	}//GEN-LAST:event_jField2LeftKeyReleased
-
-	private void jField2RightKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jField2RightKeyReleased
-		int k = evt.getKeyCode();
-		jField2Right.setText(KeyEvent.getKeyText(k));
-		keys[1][3] = k;
-	}//GEN-LAST:event_jField2RightKeyReleased
-
-	private void jField2AKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jField2AKeyReleased
-		int k = evt.getKeyCode();
-		jField2A.setText(KeyEvent.getKeyText(k));
-		keys[1][4] = k;
-	}//GEN-LAST:event_jField2AKeyReleased
-
-	private void jField2BKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jField2BKeyReleased
-		int k = evt.getKeyCode();
-		jField2B.setText(KeyEvent.getKeyText(k));
-		keys[1][5] = k;
-	}//GEN-LAST:event_jField2BKeyReleased
-
-	private void jField2SelectKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jField2SelectKeyReleased
-		int k = evt.getKeyCode();
-		jField2Select.setText(KeyEvent.getKeyText(k));
-		keys[1][6] = k;
-	}//GEN-LAST:event_jField2SelectKeyReleased
-
-	private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-		// TODO add your handling code here:
-	}//GEN-LAST:event_jButton1ActionPerformed
-
-	private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-		// TODO add your handling code here:
-	}//GEN-LAST:event_jButton2ActionPerformed
-	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private javax.swing.ButtonGroup buttonGroup1;
-	private javax.swing.JButton jButton1;
-	private javax.swing.JButton jButton2;
-	private javax.swing.JButton jButtonCancel;
-	private javax.swing.JButton jButtonOK;
-	private javax.swing.JTextField jField1A;
-	private javax.swing.JTextField jField1B;
-	private javax.swing.JTextField jField1Down;
-	private javax.swing.JTextField jField1Left;
-	private javax.swing.JTextField jField1Right;
-	private javax.swing.JTextField jField1Select;
-	private javax.swing.JTextField jField1Start;
-	private javax.swing.JTextField jField1Up;
-	private javax.swing.JTextField jField2A;
-	private javax.swing.JTextField jField2B;
-	private javax.swing.JTextField jField2Down;
-	private javax.swing.JTextField jField2Left;
-	private javax.swing.JTextField jField2Right;
-	private javax.swing.JTextField jField2Select;
-	private javax.swing.JTextField jField2Start;
-	private javax.swing.JTextField jField2Up;
-	private javax.swing.JLabel jLabel1;
-	private javax.swing.JLabel jLabel10;
-	private javax.swing.JLabel jLabel11;
-	private javax.swing.JLabel jLabel12;
-	private javax.swing.JLabel jLabel13;
-	private javax.swing.JLabel jLabel16;
-	private javax.swing.JLabel jLabel3;
-	private javax.swing.JLabel jLabel4;
-	private javax.swing.JLabel jLabel5;
-	private javax.swing.JLabel jLabel6;
-	private javax.swing.JLabel jLabel7;
-	private javax.swing.JLabel jLabel8;
-	private javax.swing.JLabel jLabel9;
-	private javax.swing.JLabel jLabelCtrl1;
-	private javax.swing.JLabel jLabelCtrl2;
-	// End of variables declaration//GEN-END:variables
+	private void keyAction(KeyEvent event, String key, JTextField textField)
+	{
+		int keyCode = event.getKeyCode();
+		map.put(key, keyCode);
+		textField.setText(KeyEvent.getKeyText(keyCode));
+	}
 }

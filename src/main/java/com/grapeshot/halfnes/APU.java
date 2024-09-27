@@ -20,7 +20,9 @@ public class APU {
 	public int sampleRate;
 	private final Timer[] timers = {
 		new SquareTimer(8, 2), new SquareTimer(8, 2),
-		new TriangleTimer(), new NoiseTimer()};
+		new TriangleTimer(), new NoiseTimer()
+	};
+
 	private double cyclespersample;
 	public final NES nes;
 	CPU cpu;
@@ -152,38 +154,40 @@ public class APU {
 		return audioOutput.bufferHasLessThan(samples);
 	}
 
-	public final int read(final int addr) {
+	public final int read(final int addr)
+	{
 		updateto(cpu.clocks);
 		switch (addr) {
-			case 0x15:
-				//returns channel status
-				//for future ref: NEED to put those ternary operators in parentheses!
-				//otherwise order of operations does the wrong thing.
-				final int returnval = ((lengthctr[0] > 0) ? 1 : 0)
-						| ((lengthctr[1] > 0) ? 2 : 0)
-						| ((lengthctr[2] > 0) ? 4 : 0)
-						| ((lengthctr[3] > 0) ? 8 : 0)
-						| ((dmcsamplesleft > 0) ? 16 : 0)
-						| (statusframeint ? 64 : 0)
-						| (statusdmcint ? 128 : 0);
-				if (statusframeint) {
-					//System.err.println("Frame interrupt ack at " + cpu.cycles);
-					--cpu.interrupt;
-					statusframeint = false;
-				}
+		case 0x15:
+			//returns channel status
+			//for future ref: NEED to put those ternary operators in parentheses!
+			//otherwise order of operations does the wrong thing.
+			final int returnval = ((lengthctr[0] > 0) ? 1 : 0)
+					| ((lengthctr[1] > 0) ? 2 : 0)
+					| ((lengthctr[2] > 0) ? 4 : 0)
+					| ((lengthctr[3] > 0) ? 8 : 0)
+					| ((dmcsamplesleft > 0) ? 16 : 0)
+					| (statusframeint ? 64 : 0)
+					| (statusdmcint ? 128 : 0);
+			if (statusframeint) {
+				//System.err.println("Frame interrupt ack at " + cpu.cycles);
+				--cpu.interrupt;
+				statusframeint = false;
+			}
 
-				//System.err.println("*" + utils.hex(returnval));
-				return returnval;
-			case 0x16:
-				nes.getcontroller1().strobe();
-				return nes.getcontroller1().getByte() | 0x40;
-			case 0x17:
-				nes.getcontroller2().strobe();
-				return nes.getcontroller2().getByte() | 0x40;
-			default:
-				return 0x40; //open bus
+			//System.err.println("*" + utils.hex(returnval));
+			return returnval;
+		case 0x16:
+			nes.getcontroller1().strobe();
+			return nes.getcontroller1().getByte() | 0x40;
+		case 0x17:
+			nes.getcontroller2().strobe();
+			return nes.getcontroller2().getByte() | 0x40;
+		default:
+			return 0x40; //open bus
 		}
 	}
+
 	final private static int[][] DUTYLOOKUP = {
 		{0, 1, 0, 0, 0, 0, 0, 0},
 		{0, 1, 1, 0, 0, 0, 0, 0},
@@ -207,7 +211,8 @@ public class APU {
 		audioOutput.resume();
 	}
 
-	public final void write(final int reg, final int data) {
+	public final void write(final int reg, final int data)
+	{
 		//This is how values written to any of the APU's memory
 		//mapped registers change the state of the system.
 		updateto(cpu.clocks - 1);

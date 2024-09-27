@@ -681,8 +681,8 @@ public class MainForm extends JFrame {
 		final ControlsDialog dialog = new ControlsDialog(this);
 		dialog.setVisible(true);
 		if (dialog.okClicked()) {
-			padController1.setButtons();
-			padController2.setButtons();
+			padController1.updateButtons();
+			padController2.updateButtons();
 		}
 	}
 

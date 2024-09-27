@@ -18,9 +18,12 @@ import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.prefs.Preferences;
 
 import javafx.scene.Scene;
+import javafx.util.Pair;
 import net.java.games.input.Component;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
@@ -36,13 +39,52 @@ import com.grapeshot.halfnes.util.ThreadLoop;
  * (cf. http://java.net/projects/jinput).
  */
 public class ControllerKeyListener implements KeyListener {
+	public static final String KEY_CTRL1_KEYUP = "controller1.keyUp";
+	public static final String KEY_CTRL1_KEYDN = "controller1.keyDown";
+	public static final String KEY_CTRL1_KEYLF = "controller1.keyLeft";
+	public static final String KEY_CTRL1_KEYRT = "controller1.keyRight";
+	public static final String KEY_CTRL1_KEYA = "controller1.keyA";
+	public static final String KEY_CTRL1_KEYB = "controller1.keyB";
+	public static final String KEY_CTRL1_KEYSL = "controller1.keySelect";
+	public static final String KEY_CTRL1_KEYST = "controller1.keyStart";
+
+	public static final String KEY_CTRL2_KEYUP = "controller2.keyUp";
+	public static final String KEY_CTRL2_KEYDN = "controller2.keyDown";
+	public static final String KEY_CTRL2_KEYLF = "controller2.keyLeft";
+	public static final String KEY_CTRL2_KEYRT = "controller2.keyRight";
+	public static final String KEY_CTRL2_KEYA = "controller2.keyA";
+	public static final String KEY_CTRL2_KEYB = "controller2.keyB";
+	public static final String KEY_CTRL2_KEYSL = "controller2.keySelect";
+	public static final String KEY_CTRL2_KEYST = "controller2.keyStart";
+
+
+	private final Preferences prefs = PrefsSingleton.getInstance();
 	private Controller gameController;
 	private Component[] buttons;
 	private int latchByte = 0, controllerByte = 0, prevByte = 0, outByte = 0, gamepadByte = 0;
-	private final HashMap<Integer, Integer> m = new HashMap<>(10);
+	private final Map<Integer, Integer> map = new HashMap<>();
 	private final int controllernum;
 	private final ThreadLoop loop;
 
+	public static final Map<String, Pair<Integer, Integer>> keyMap = new HashMap<String, Pair<Integer, Integer>>() {{
+		put(KEY_CTRL1_KEYA, new Pair<Integer, Integer>(KeyEvent.VK_X, BIT0));
+		put(KEY_CTRL1_KEYB, new Pair<Integer, Integer>(KeyEvent.VK_Z, BIT1));
+		put(KEY_CTRL1_KEYSL, new Pair<Integer, Integer>(KeyEvent.VK_SHIFT, BIT2));
+		put(KEY_CTRL1_KEYST, new Pair<Integer, Integer>(KeyEvent.VK_ENTER, BIT3));
+		put(KEY_CTRL1_KEYUP, new Pair<Integer, Integer>(KeyEvent.VK_UP, BIT4));
+		put(KEY_CTRL1_KEYDN, new Pair<Integer, Integer>(KeyEvent.VK_DOWN, BIT5));
+		put(KEY_CTRL1_KEYLF, new Pair<Integer, Integer>(KeyEvent.VK_LEFT, BIT6));
+		put(KEY_CTRL1_KEYRT, new Pair<Integer, Integer>(KeyEvent.VK_RIGHT, BIT7));
+
+		put(KEY_CTRL2_KEYA, new Pair<Integer, Integer>(KeyEvent.VK_G, BIT0));
+		put(KEY_CTRL2_KEYB, new Pair<Integer, Integer>(KeyEvent.VK_F, BIT1));
+		put(KEY_CTRL2_KEYSL, new Pair<Integer, Integer>(KeyEvent.VK_R, BIT2));
+		put(KEY_CTRL2_KEYST, new Pair<Integer, Integer>(KeyEvent.VK_T, BIT3));
+		put(KEY_CTRL2_KEYUP, new Pair<Integer, Integer>(KeyEvent.VK_W, BIT4));
+		put(KEY_CTRL2_KEYDN, new Pair<Integer, Integer>(KeyEvent.VK_S, BIT5));
+		put(KEY_CTRL2_KEYLF, new Pair<Integer, Integer>(KeyEvent.VK_A, BIT6));
+		put(KEY_CTRL2_KEYRT, new Pair<Integer, Integer>(KeyEvent.VK_D, BIT7));
+	}};
 
 	public ControllerKeyListener(final Scene scene, final int controllernum)
 	{
@@ -58,9 +100,9 @@ public class ControllerKeyListener implements KeyListener {
 		}
 
 		this.controllernum = controllernum;
-		setButtons();
+		updateButtons();
 
-		loop = new ThreadLoop(() ->{
+		loop = new ThreadLoop(() -> {
 			if (gameController == null) {
 				return;
 			}
@@ -131,11 +173,11 @@ public class ControllerKeyListener implements KeyListener {
 	{
 		//enable the byte of whatever is found
 		prevByte = controllerByte;
-		if (!m.containsKey(keyCode)) {
+		if (!map.containsKey(keyCode)) {
 			return;
 		}
 		//enable the corresponding bit to the key
-		controllerByte |= m.get(keyCode);
+		controllerByte |= map.get(keyCode);
 		//special case: if up and down are pressed at once, use whichever was pressed previously
 		if ((controllerByte & (BIT4 | BIT5)) == (BIT4 | BIT5)) {
 			controllerByte &= ~(BIT4 | BIT5);
@@ -157,10 +199,10 @@ public class ControllerKeyListener implements KeyListener {
 	private void releaseKey(int keyCode)
 	{
 		prevByte = controllerByte;
-		if (!m.containsKey(keyCode)) {
+		if (!map.containsKey(keyCode)) {
 			return;
 		}
-		controllerByte &= ~m.get(keyCode);
+		controllerByte &= ~map.get(keyCode);
 	}
 
 	public int getByte()
@@ -174,9 +216,9 @@ public class ControllerKeyListener implements KeyListener {
 	}
 
 	@Override
-	public void keyTyped(final KeyEvent arg0)
+	public void keyTyped(final KeyEvent keyEvent)
 	{
-		// TODO Auto-generated method stub
+		;
 	}
 
 	public void strobe()
@@ -191,11 +233,6 @@ public class ControllerKeyListener implements KeyListener {
 		latchByte = gamepadByte | controllerByte;
 	}
 
-	/**
-	 * Start in a separate thread the processing of the controller event queue.
-	 * Must be called after construction of the class to enable the processing
-	 * of the joystick / gamepad events.
-	 */
 	public void start()
 	{
 		loop.start();
@@ -217,22 +254,13 @@ public class ControllerKeyListener implements KeyListener {
 		}
 	}
 
-	/**
-	 * Stop the controller event queue thread. Must be called before closing the
-	 * application.
-	 */
 	public void stop()
 	{
 		loop.stop();
 	}
 
-	/**
-	 * This method detects the available joysticks / gamepads on the computer
-	 * and return them in a list.
-	 *
-	 * @return List of available joysticks / gamepads connected to the computer
-	 */
-	private static Controller[] getAvailablePadControllers()
+
+	private List<Controller> getGameControllers()
 	{
 		List<Controller> gameControllers = new ArrayList<>();
 		// Get a list of the controllers JInput knows about and can interact
@@ -241,7 +269,9 @@ public class ControllerKeyListener implements KeyListener {
 		// Check the useable controllers (gamepads or joysticks with at least 2
 		// axis and 2 buttons)
 		for (Controller controller : controllers) {
-			if ((controller.getType() == Controller.Type.GAMEPAD) || (controller.getType() == Controller.Type.STICK)) {
+			if ((controller.getType() == Controller.Type.GAMEPAD)
+				|| (controller.getType() == Controller.Type.STICK)) {
+
 				int nbOfAxis = 0;
 				// Get this controllers components (buttons and axis)
 				Component[] components = controller.getComponents();
@@ -249,7 +279,7 @@ public class ControllerKeyListener implements KeyListener {
 				// (for A and B, because select and start can use the keyboard)
 				for (Component component : components) {
 					if ((component.getIdentifier() == Component.Identifier.Axis.X)
-							|| (component.getIdentifier() == Component.Identifier.Axis.Y)) {
+						|| (component.getIdentifier() == Component.Identifier.Axis.Y)) {
 						nbOfAxis++;
 					}
 				}
@@ -260,14 +290,17 @@ public class ControllerKeyListener implements KeyListener {
 			}
 		}
 
-		return gameControllers.toArray(new Controller[0]);
+		return gameControllers;
 	}
 
 	/**
 	 * Return the available buttons on this controller (by priority order).
 	 */
-	private static Component[] getButtons(Controller controller)
+	private Component[] getButtons(Controller controller)
 	{
+		if (controller == null) {
+			return null;
+		}
 		List<Component> buttons = new ArrayList<>();
 		// Get this controllers components (buttons and axis)
 		Component[] components = controller.getComponents();
@@ -279,44 +312,22 @@ public class ControllerKeyListener implements KeyListener {
 		return buttons.toArray(new Component[0]);
 	}
 
-	public final void setButtons()
+	public final void updateButtons()
 	{
-		Preferences prefs = PrefsSingleton.getInstance();
-		//reset the buttons from prefs
-		m.clear();
-		switch (controllernum) {
-		case 0:
-			m.put(prefs.getInt("keyUp1", KeyEvent.VK_UP), BIT4);
-			m.put(prefs.getInt("keyDown1", KeyEvent.VK_DOWN), BIT5);
-			m.put(prefs.getInt("keyLeft1", KeyEvent.VK_LEFT), BIT6);
-			m.put(prefs.getInt("keyRight1", KeyEvent.VK_RIGHT), BIT7);
-			m.put(prefs.getInt("keyA1", KeyEvent.VK_X), BIT0);
-			m.put(prefs.getInt("keyB1", KeyEvent.VK_Z), BIT1);
-			m.put(prefs.getInt("keySelect1", KeyEvent.VK_SHIFT), BIT2);
-			m.put(prefs.getInt("keyStart1", KeyEvent.VK_ENTER), BIT3);
-			break;
-		case 1:
-		default:
-			m.put(prefs.getInt("keyUp2", KeyEvent.VK_W), BIT4);
-			m.put(prefs.getInt("keyDown2", KeyEvent.VK_S), BIT5);
-			m.put(prefs.getInt("keyLeft2", KeyEvent.VK_A), BIT6);
-			m.put(prefs.getInt("keyRight2", KeyEvent.VK_D), BIT7);
-			m.put(prefs.getInt("keyA2", KeyEvent.VK_G), BIT0);
-			m.put(prefs.getInt("keyB2", KeyEvent.VK_F), BIT1);
-			m.put(prefs.getInt("keySelect2", KeyEvent.VK_R), BIT2);
-			m.put(prefs.getInt("keyStart2", KeyEvent.VK_T), BIT3);
-			break;
-
+		map.clear();
+		for (Entry<String, Pair<Integer, Integer>> entry : keyMap.entrySet()) {
+			Pair<Integer, Integer> value = entry.getValue();
+			map.put(prefs.getInt(entry.getKey(), value.getKey()), value.getValue());
 		}
 
-		Controller[] controllers = getAvailablePadControllers();
-		if (controllers.length > controllernum) {
-			this.gameController = controllers[controllernum];
+		List<Controller> controllers = getGameControllers();
+		if (controllernum < controllers.size()) {
+			gameController = controllers.get(controllernum);
 			PrefsSingleton.getInstance().put("controller" + controllernum, gameController.getName());
 			System.err.println(controllernum + 1 + ". " + gameController.getName());
-			this.buttons = getButtons(controllers[controllernum]);
+			this.buttons = getButtons(controllers.get(controllernum));
 		} else {
-			PrefsSingleton.getInstance().put("controller" + controllernum, "");
+			prefs.put("controller" + controllernum, "");
 			this.gameController = null;
 			this.buttons = null;
 		}
