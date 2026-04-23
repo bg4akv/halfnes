@@ -155,7 +155,7 @@ public class MainForm extends JFrame {
 				String cmd = e.getActionCommand();
 				// placeholder for more robust handler
 				if (cmd.equals(CMD_QUIT)) {
-					dispose();
+					close();
 				} else if (cmd.equals(CMD_RESET)) {
 					nes.reset();
 				} else if (cmd.equals(CMD_HARD_RESET)) {
@@ -216,50 +216,57 @@ public class MainForm extends JFrame {
 		registerKeyboardAction(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0), CMD_TOGGLE_FULL_SCREEN);
 		registerKeyboardAction(KeyStroke.getKeyStroke(KeyEvent.VK_F4, KeyEvent.ALT_DOWN_MASK), CMD_QUIT);
 
+		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowListener() {
 			@Override
-			public void windowOpened(WindowEvent e)
+			public void windowOpened(WindowEvent var1)
 			{
 				;
 			}
 
 			@Override
-			public void windowIconified(WindowEvent e)
+			public void windowIconified(WindowEvent var1)
 			{
 				;
 			}
 
 			@Override
-			public void windowDeiconified(WindowEvent e)
+			public void windowDeiconified(WindowEvent var1)
 			{
 				;
 			}
 
 			@Override
-			public void windowDeactivated(WindowEvent e)
+			public void windowDeactivated(WindowEvent var1)
 			{
 				;
 			}
 
 			@Override
-			public void windowClosing(WindowEvent e)
+			public void windowClosing(WindowEvent var1)
 			{
+
+				if (!showConfirmDialog("Exit?")) {
+					return;
+				}
+
+				stop();
+				saveWindowLocation();
 				dispose();
 			}
 
 			@Override
-			public void windowClosed(WindowEvent e)
+			public void windowClosed(WindowEvent var1)
 			{
 				;
 			}
 
 			@Override
-			public void windowActivated(WindowEvent e)
+			public void windowActivated(WindowEvent var1)
 			{
 				;
 			}
 		});
-		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
 		setVisible(true);
 		// Create BackBuffer
@@ -291,6 +298,11 @@ public class MainForm extends JFrame {
 				return true;
 			}
 		});
+	}
+
+	private void close()
+	{
+		dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
 	}
 
 	private void registerKeyboardAction(final KeyStroke keyStroke, String cmd)
@@ -710,16 +722,13 @@ public class MainForm extends JFrame {
 		return Math.min(height / (double) NES_HEIGHT, width / (double) NES_WIDTH);
 	}
 
-	private void showMessageDialog(final String message)
+	private void showMessageDialog(String message)
 	{
 		JOptionPane.showMessageDialog(this, message);
 	}
 
-	@Override
-	public void dispose()
+	private boolean showConfirmDialog(String text)
 	{
-		stop();
-		saveWindowLocation();
-		super.dispose();
+		return (JOptionPane.showConfirmDialog(this, text, "", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE) == 0);
 	}
 }

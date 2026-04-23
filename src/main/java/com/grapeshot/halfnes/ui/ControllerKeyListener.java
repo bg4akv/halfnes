@@ -235,7 +235,9 @@ public class ControllerKeyListener implements KeyListener {
 
 	public void start()
 	{
-		loop.start();
+		if (gameController != null) {
+			loop.start();
+		}
 	}
 
 	private boolean isPressed(Event event)
@@ -325,11 +327,11 @@ public class ControllerKeyListener implements KeyListener {
 			gameController = controllers.get(controllernum);
 			PrefsSingleton.getInstance().put("controller" + controllernum, gameController.getName());
 			System.err.println(controllernum + 1 + ". " + gameController.getName());
-			this.buttons = getButtons(controllers.get(controllernum));
+			buttons = getButtons(controllers.get(controllernum));
 		} else {
 			prefs.put("controller" + controllernum, "");
-			this.gameController = null;
-			this.buttons = null;
+			gameController = null;
+			buttons = null;
 		}
 	}
 }

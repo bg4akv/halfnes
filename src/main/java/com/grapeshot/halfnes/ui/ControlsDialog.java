@@ -26,7 +26,6 @@ import java.util.prefs.Preferences;
 
 import javafx.util.Pair;
 
-import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -42,7 +41,6 @@ import com.grapeshot.halfnes.PrefsSingleton;
  * @author Andrew
  */
 public class ControlsDialog extends JDialog {
-	private ButtonGroup buttonGroup1;
 	private JButton jButton1;
 	private JButton jButton2;
 	private JButton jButtonCancel;
@@ -136,7 +134,6 @@ public class ControlsDialog extends JDialog {
 
 	private void initComponents()
 	{
-		buttonGroup1 = new ButtonGroup();
 		jLabel3 = new JLabel();
 		jLabel4 = new JLabel();
 		jLabel5 = new JLabel();
@@ -368,7 +365,7 @@ public class ControlsDialog extends JDialog {
 
 		jLabel16.setText(" Click in text box and type a key to change that binding.");
 
-		jLabel1.setFont(new java.awt.Font("Tahoma", 1, 11));
+		jLabel1.setFont(new Font("Tahoma", 1, 11));
 		jLabel1.setText("Detected Game Controllers:");
 
 		jLabelCtrl1.setText("No Player 1 controller connected");

@@ -17,7 +17,7 @@ import com.grapeshot.halfnes.ppu.PPU;
 
 
 public abstract class Mapper {
-
+	private static final CRC32 crc32 = new CRC32();
 	protected ROMLoader loader;
 	protected int mappertype, submapper, prgsize, prgoff, chroff, chrsize;
 	public CPU cpu;
@@ -63,11 +63,10 @@ public abstract class Mapper {
 
 	public static long crc32(int[] array)
 	{
-		CRC32 c = new CRC32();
 		for (int i : array) {
-			c.update(i);
+			crc32.update(i);
 		}
-		return c.getValue();
+		return crc32.getValue();
 	}
 
 	public void loadrom() throws BadMapperException

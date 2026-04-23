@@ -6,7 +6,6 @@ package com.grapeshot.halfnes.video;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
-import java.awt.image.WritableRaster;
 
 import com.grapeshot.halfnes.ppu.PPU;
 
@@ -47,9 +46,7 @@ public abstract class Renderer {
 	protected BufferedImage getBufferedImage(int[] frame)
 	{
 		final BufferedImage image = images[++imgIdx % images.length];
-		final WritableRaster raster = image.getRaster();
-		final int[] pixels = ((DataBufferInt) raster.getDataBuffer()).getData();
-
+		final int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 
 		System.arraycopy(frame, frameWidth * clip, pixels, 0, frameWidth * height);
 
