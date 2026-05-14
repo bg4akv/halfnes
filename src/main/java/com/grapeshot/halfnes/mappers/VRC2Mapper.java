@@ -26,9 +26,9 @@ public class VRC2Mapper extends Mapper {
 	}
 
 	@Override
-	public final void cartWrite(int addr, int data) {
+	public final void write(int addr, int data) {
 		if (addr < 0x8000 || addr > 0xffff) {
-			super.cartWrite(addr, data);
+			super.write(addr, data);
 			return;
 		}
 		boolean bit0 = ((addr & (utils.BIT1)) != 0);

@@ -21,7 +21,7 @@ public class ThreadLoop {
 		thread = new Thread(() -> {
 			final long currentThreadId = Thread.currentThread().getId();
 			while (thread != null
-					&& currentThreadId == thread.getId()) {
+				&& currentThreadId == thread.getId()) {
 				try {
 					runnable.run();
 				} catch (Exception e) {
@@ -47,7 +47,7 @@ public class ThreadLoop {
 		long stopTime = System.currentTimeMillis() + 1000;
 		while (true) {
 			if (terminated
-					|| (System.currentTimeMillis() >= stopTime)) {
+				|| (System.currentTimeMillis() >= stopTime)) {
 				break;
 			}
 		}

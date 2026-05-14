@@ -18,9 +18,9 @@ public class BnromMapper extends Mapper {
 	}
 
 	@Override
-	public final void cartWrite(int addr, int data) {
+	public final void write(int addr, int data) {
 		if (addr < 0x8000 || addr > 0xffff) {
-			super.cartWrite(addr, data);
+			super.write(addr, data);
 			return;
 		}
 		//remap all 32k of PRG to 32 x bank #

@@ -7,7 +7,7 @@ package com.grapeshot.halfnes.video;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 
-import com.grapeshot.halfnes.ppu.PPU;
+import com.grapeshot.halfnes.device.PPU;
 
 /**
  *

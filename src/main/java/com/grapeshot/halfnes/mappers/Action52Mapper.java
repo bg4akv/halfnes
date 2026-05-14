@@ -21,11 +21,11 @@ public class Action52Mapper extends Mapper {
 	@Override
 	public void loadrom() throws BadMapperException {
 		super.loadrom();
-		cartWrite(0x8000, 0);
+		write(0x8000, 0);
 	}
 
 	@Override
-	public final void cartWrite(final int addr, final int data) {
+	public final void write(final int addr, final int data) {
 		if (addr <= 0x5fff) {
 			ram[addr & 3] = data & 0xf;
 		} else if (addr >= 0x8000) {
@@ -65,7 +65,7 @@ public class Action52Mapper extends Mapper {
 	}
 
 	@Override
-	public final int cartRead(final int addr) {
+	public final int read(final int addr) {
 		// by default has wram at 0x6000 and cartridge at 0x8000-0xfff
 		// but some mappers have different so override for those
 		if (addr >= 0x8000) {
@@ -77,6 +77,6 @@ public class Action52Mapper extends Mapper {
 	}
 
 	public void reset() {
-		cartWrite(0x8000, 0);
+		write(0x8000, 0);
 	}
 }

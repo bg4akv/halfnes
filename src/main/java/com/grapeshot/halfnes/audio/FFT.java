@@ -8,6 +8,7 @@ package com.grapeshot.halfnes.audio;
  *
  * @author Andrew
  */
+@Deprecated
 public class FFT {
 //note to self: works, des not give sensible results when plotted
 	//on a linear scale! why? you should know this. hearing's logarithmic.

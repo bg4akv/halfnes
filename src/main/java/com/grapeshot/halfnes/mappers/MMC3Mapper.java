@@ -39,9 +39,9 @@ public class MMC3Mapper extends Mapper {
 	}
 
 	@Override
-	public void cartWrite(int addr, int data) {
+	public void write(int addr, int data) {
 		if (addr < 0x8000 || addr > 0xffff) {
-			super.cartWrite(addr, data);
+			super.write(addr, data);
 			return;
 		}
 		//bankswitches here

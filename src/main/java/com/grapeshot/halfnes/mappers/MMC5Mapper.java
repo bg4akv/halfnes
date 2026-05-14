@@ -49,7 +49,7 @@ public class MMC5Mapper extends Mapper {
 	}
 
 	@Override
-	public final void cartWrite(final int addr, final int data) {
+	public final void write(final int addr, final int data) {
 		if (addr < 0x5c00) {
 			//System.err.println("MMC5 Write register "+ utils.hex(addr) + " d " + utils.hex(data));
 			switch (addr) {
@@ -66,7 +66,7 @@ public class MMC5Mapper extends Mapper {
 				case 0x5015:
 					if (soundchip == null) {
 						soundchip = new MMC5SoundChip();
-						cpuram.apu.addExpnSound(soundchip);
+						cpuram.apu.addExpansionSoundChip(soundchip);
 					}
 					//sound chip
 					soundchip.write(addr - 0x5000, data);
@@ -243,7 +243,7 @@ public class MMC5Mapper extends Mapper {
 	}
 
 	@Override
-	public final int cartRead(final int addr) {
+	public final int read(final int addr) {
 		//hook for turning off PPU in frame flag since idk how the real thing works
 		if (!ppu.renderingOn() || ppu.scanLineIdx > 241) {
 			inFrame = false;

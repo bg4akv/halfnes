@@ -22,9 +22,9 @@ public class Mapper152 extends Mapper {
 	}
 
 	@Override
-	public final void cartWrite(final int addr, final int data) {
+	public final void write(final int addr, final int data) {
 		if (addr < 0x8000 || addr > 0xffff) {
-			super.cartWrite(addr, data);
+			super.write(addr, data);
 			return;
 		}
 		int prgselect = (byte) ((data >> 4) & 0xF);

@@ -15,7 +15,7 @@ public class Mapper86 extends Mapper {
 	}
 
 	@Override
-	public final void cartWrite(final int addr, final int data) {
+	public final void write(final int addr, final int data) {
 		if (addr >= 0x6000 && addr <= 0x6FFF) {
 			int prgselect = (data >> 4) & 3;
 			int chrselect = (data & 3) | ((data & 0x40) >> 4);

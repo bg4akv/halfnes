@@ -2,7 +2,7 @@
  * HalfNES by Andrew Hoffman
  * Licensed under the GNU GPL Version 3. See LICENSE file
  */
-package com.grapeshot.halfnes.ppu;
+package com.grapeshot.halfnes.device;
 
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
@@ -14,7 +14,8 @@ import com.grapeshot.halfnes.ui.DebugUI;
 import com.grapeshot.halfnes.ui.MainForm;
 
 
-public class PPU {
+public class PPU extends NESDev {
+
 	public static final int ADDR_PPUCTRL = 0x2000; //NMI enable (V), PPU master/slave (P), sprite height (H), background tile select (B), sprite tile select (S), increment mode (I), nametable select (NN)
 	public static final int ADDR_PPUMASK = 0x2001; //color emphasis (BGR), sprite enable (s), background enable (b), sprite left column enable (M), background left column enable (m), greyscale (G)
 	public static final int ADDR_PPUSTATUS = 0x2002; //vblank (V), sprite 0 hit (S), sprite overflow (O); read resets write pair for 0x2005/0x2006
@@ -24,10 +25,6 @@ public class PPU {
 	public static final int ADDR_PPUADDR = 0x2006; //PPU read/write address (two writes: most significant byte, least significant byte)
 	public static final int ADDR_PPUDATA = 0x2007; //PPU data read/write
 	public static final int ADDR_OAMDMA = 0x4014; //OAM DMA high address
-
-
-
-
 
 
 
@@ -43,15 +40,31 @@ public class PPU {
 	private int cycles = 0;
 	private int frameCount = 0;
 	private int div = 2;
-	private final int[] OAM = new int[4*64], secOAM = new int[32],
-			spriteshiftregH = new int[8],
-			spriteshiftregL = new int[8], spriteXlatch = new int[8],
-			spritepals = new int[8], bitmap = new int[256 * HEIGHT];
+
+	private final int[] OAM = new int[4*64];
+	private final int[] secOAM = new int[32];
+	private final int[] spriteshiftregH = new int[8];
+	private final int[] spriteshiftregL = new int[8];
+	private final int[] spriteXlatch = new int[8];
+	private final int[] spritepals = new int[8];
+	private final int[] bitmap = new int[256 * HEIGHT];
+
 	private int found, bgShiftRegH, bgShiftRegL, bgAttrShiftRegH, bgAttrShiftRegL;
 	private final boolean[] spritebgflags = new boolean[8];
-	private boolean even = true, bgpattern = true, sprpattern, spritesize, nmicontrol,
-			grayscale, bgClip, spriteClip, bgOn, spritesOn,
-			vblankflag, sprite0hit, spriteoverflow;
+	private boolean even = true;
+	private boolean bgpattern = true;
+	private boolean sprpattern;
+	private boolean spritesize;
+	private boolean nmicontrol;
+	private boolean grayscale;
+	private boolean bgClip;
+	private boolean spriteClip;
+	private boolean bgOn;
+	private boolean spritesOn;
+	private boolean vblankflag;
+	private boolean sprite0hit;
+	private boolean spriteoverflow;
+
 	private int emph;
 	public final int[] pal;
 	private DebugUI debuggui;
@@ -67,8 +80,6 @@ public class PPU {
 	private int scanLineCount;
 	private int vblankline;
 	private final int[] cpudivider = {3, 3, 3, 3, 3};
-
-
 
 
 	public PPU(final Mapper mapper)
@@ -132,9 +143,10 @@ public class PPU {
 	 * @return the data in the PPU register, or open bus (the last value written
 	 * to a PPU register) if the register is read only
 	 */
+	@Override
 	public final int read(final int regnum)
 	{
-		switch (regnum) {
+		switch (regnum & ADDR_MASK()) {
 		case 2:
 			even = true;
 			if (scanLineIdx == 241) {
@@ -212,6 +224,7 @@ public class PPU {
 	 * to these elsewhere
 	 * @param data the value to write to the register (0x00 to 0xff valid)
 	 */
+	@Override
 	public final void write(final int regnum, final int data)
 	{
 		//if (regnum != 4 /*&& regnum != 7*/) {
@@ -221,7 +234,7 @@ public class PPU {
 		//}
 		//debugdraw();
 		openbus = data;
-		switch (regnum) {
+		switch (regnum & ADDR_MASK()) {
 		case 0: //PPUCONTROL (2000)
 			//set 2 bits of vram address (nametable select)
 			//bits 0 and 1 affect loopyT to change nametable start by 0x400
@@ -871,5 +884,12 @@ public class PPU {
 			gui.setFrame(bitmap, bgcolors, dotcrawl);
 		}
 
+	}
+
+
+	@Override
+	public int ADDR_MASK()
+	{
+		return 0x0007; //bit2-0
 	}
 }

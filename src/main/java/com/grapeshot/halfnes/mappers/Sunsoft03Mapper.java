@@ -28,7 +28,7 @@ public class Sunsoft03Mapper extends Mapper {
 	}
 
 	@Override
-	public final void cartWrite(final int addr, final int data) {
+	public final void write(final int addr, final int data) {
 		if (addr >= 0x8800 && addr <= 0x8FFF) {
 			chrbank[0] = data;
 			setupchr();

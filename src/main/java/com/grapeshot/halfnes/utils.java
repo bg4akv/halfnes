@@ -8,14 +8,33 @@ import java.util.Locale;
 
 
 public class utils {
+	public static final int BIT0 = 1;
+	public static final int BIT1 = 1 << 1;
+	public static final int BIT2 = 1 << 2;
+	public static final int BIT3 = 1 << 3;
+	public static final int BIT4 = 1 << 4;
+	public static final int BIT5 = 1 << 5;
+	public static final int BIT6 = 1 << 6;
+	public static final int BIT7 = 1 << 7;
+	public static final int BIT8 = 1 << 8;
+	public static final int BIT9 = 1 << 9;
+	public static final int BIT10 = 1 << 10;
+	public static final int BIT11 = 1 << 11;
+	public static final int BIT12 = 1 << 12;
+	public static final int BIT13 = 1 << 13;
+	public static final int BIT14 = 1 << 14;
+	public static final int BIT15 = 1 << 15;
 
-	private utils() {
+
+	private utils()
+	{
+
 	}
 
-	public static final int BIT0 = 1, BIT1 = 2, BIT2 = 4, BIT3 = 8, BIT4 = 16,
-			BIT5 = 32, BIT6 = 64, BIT7 = 128, BIT8 = 256, BIT9 = 512,
-			BIT10 = 1024, BIT11 = 2048, BIT12 = 4096, BIT13 = 8192,
-			BIT14 = 16384, BIT15 = 32768;
+	public static boolean isBitSet(int data, int bit)
+	{
+		return (data & (1 << bit)) != 0;
+	}
 
 	public static int setbit(final int num, final int bitnum, final boolean state)
 	{

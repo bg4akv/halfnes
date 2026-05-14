@@ -6,7 +6,7 @@ package com.grapeshot.halfnes.mappers;
 
 import com.grapeshot.halfnes.*;
 import com.grapeshot.halfnes.audio.*;
-import com.grapeshot.halfnes.ppu.PPU;
+import com.grapeshot.halfnes.device.PPU;
 
 import java.util.Arrays;
 
@@ -185,7 +185,7 @@ public class NSFMapper extends Mapper {
 
 	//write into the cartridge's address space
 	@Override
-	public void cartWrite(final int addr, final int data) {
+	public void write(final int addr, final int data) {
 		if (n163 && addr == 0xF800) {
 			n163autoincrement = ((data & (utils.BIT7)) != 0);
 			n163soundAddr = data & 0x7f;
@@ -254,7 +254,7 @@ public class NSFMapper extends Mapper {
 	}
 
 	@Override
-	public int cartRead(final int addr) {
+	public int read(final int addr) {
 		// by default has wram at 0x6000 and cartridge at 0x8000-0xfff
 		// but some mappers have different so override for those
 		if (addr >= 0x8000) {
@@ -446,37 +446,37 @@ public class NSFMapper extends Mapper {
 			//VRC6 audio
 			vrc6 = true;
 			vrc6Audio = new VRC6SoundChip();
-			cpuram.apu.addExpnSound(vrc6Audio);
+			cpuram.apu.addExpansionSoundChip(vrc6Audio);
 		}
 		if (((sndchip & (utils.BIT1)) != 0)) {
 			//VRC7 audio
 			vrc7 = true;
 			vrc7Audio = new VRC7SoundChip();
-			cpuram.apu.addExpnSound(vrc7Audio);
+			cpuram.apu.addExpansionSoundChip(vrc7Audio);
 		}
 		if (((sndchip & (utils.BIT2)) != 0)) {
 			//FDS audio, not yet implemented
 			fds = true;
 			fdsAudio = new FDSSoundChip();
-			cpuram.apu.addExpnSound(fdsAudio);
+			cpuram.apu.addExpansionSoundChip(fdsAudio);
 		}
 		if (((sndchip & (utils.BIT3)) != 0)) {
 			//MMC5 audio
 			mmc5 = true;
 			mmc5Audio = new MMC5SoundChip();
-			cpuram.apu.addExpnSound(mmc5Audio);
+			cpuram.apu.addExpansionSoundChip(mmc5Audio);
 		}
 		if (((sndchip & (utils.BIT4)) != 0)) {
 			//Namco 163 audio
 			n163 = true;
 			n163Audio = new Namco163SoundChip();
-			cpuram.apu.addExpnSound(n163Audio);
+			cpuram.apu.addExpansionSoundChip(n163Audio);
 		}
 		if (((sndchip & (utils.BIT5)) != 0)) {
 			//Sunsoft 5B audio
 			s5b = true;
 			s5bAudio = new Sunsoft5BSoundChip();
-			cpuram.apu.addExpnSound(s5bAudio);
+			cpuram.apu.addExpansionSoundChip(s5bAudio);
 		}
 	}
 

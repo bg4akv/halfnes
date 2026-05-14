@@ -21,6 +21,7 @@ public class ROMLoader {
 	public Mapper.MirrorType scrolltype;
 	public Mapper.TVType tvtype;
 	public int mappertype;
+	public Mapper.MapperType mapperType;
 	public int submapper;
 	public int prgoff, chroff;
 	public boolean savesram = false;

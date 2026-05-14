@@ -4,13 +4,17 @@
  */
 package com.grapeshot.halfnes;
 
-import com.grapeshot.halfnes.cheats.Patch;
-import com.grapeshot.halfnes.mappers.Mapper;
-import com.grapeshot.halfnes.ppu.PPU;
-
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.grapeshot.halfnes.cheats.Patch;
+import com.grapeshot.halfnes.device.APU;
+import com.grapeshot.halfnes.device.ExpansionOrIO;
+import com.grapeshot.halfnes.device.NESDev;
+import com.grapeshot.halfnes.device.PPU;
+import com.grapeshot.halfnes.device.RAM;
+import com.grapeshot.halfnes.device.SRAM;
+import com.grapeshot.halfnes.mappers.Mapper;
 
 
 /**
@@ -20,17 +24,26 @@ import java.util.Map;
  *
  */
 public class CPUAddrSpace {
+	//private final int[] wram = new int[2048];
+	private final RAM ram;
+	private final SRAM sram;
+	private final ExpansionOrIO expansionOrIO;
 
-	private final int[] wram = new int[2048];
-	Mapper mapper;
+	public Mapper mapper;
 	public APU apu;
-	PPU ppu; //need these to call their write handlers from here.
+	private PPU ppu; //need these to call their write handlers from here.
 	private Map<Integer, Patch> patches = new HashMap<>();
 
-	public CPUAddrSpace(final Mapper mappy) {
+
+
+	public CPUAddrSpace(final Mapper mappy)
+	{
 		mapper = mappy;
 		// init memory
-		Arrays.fill(wram, 0xff);
+		//Arrays.fill(wram, 0xff);
+		ram = new RAM();
+		sram = new SRAM();
+		expansionOrIO = new ExpansionOrIO();
 	}
 
 	public final int read(final int addr)
@@ -47,12 +60,12 @@ public class CPUAddrSpace {
 		}
 	}
 
-	public final int _read(final int addr)
+	private final int _read(final int addr)
 	{
 		if (addr > 0x4018) {
-			return mapper.cartRead(addr);
+			return mapper.read(addr);
 		} else if (addr <= 0x1fff) {
-			return wram[addr & 0x7FF];
+			return ram.read(addr);
 		} else if (addr <= 0x3fff) {
 			// 8 byte ppu regs; mirrored lots
 			return ppu.read(addr & 7);
@@ -69,9 +82,9 @@ public class CPUAddrSpace {
 		//	System.err.println("DANGER WILL ROBINSON");
 		//}
 		if (addr > 0x4018) {
-			mapper.cartWrite(addr, data);
+			mapper.write(addr, data);
 		} else if (addr <= 0x1fff) {
-			wram[addr & 0x7FF] = data;
+			ram.write(addr, data);
 		} else if (addr <= 0x3fff) {
 			// 8 byte ppu regs; mirrored lots
 			ppu.write(addr & 7, data);
@@ -79,6 +92,33 @@ public class CPUAddrSpace {
 			apu.write(addr - 0x4000, data);
 		}
 	}
+
+
+	private NESDev selectDevice(int addr)
+	{
+		//bit 15-13
+		switch ((addr >> 13) & 0x07) {
+		case 0: //CPU RAM
+			return ram;
+		case 1: //PPU
+			return ppu;
+		case 2: //Expansion/I/O
+			return expansionOrIO.selectDevice(addr);
+		case 3: //SRAM
+			return sram;
+		case 4: //PRG ROM bank 0
+			return null;
+		case 5: //PRG ROM bank 1
+			return null;
+		case 6: //PRG ROM bank 2
+			return null;
+		case 7: //PRG ROM bank 3
+			return null;
+		default:
+			return null;
+		}
+	}
+
 
 	public void setAPU(APU apu)
 	{

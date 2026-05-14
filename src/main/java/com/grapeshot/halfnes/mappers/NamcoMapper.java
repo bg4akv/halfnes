@@ -4,9 +4,10 @@
  */
 package com.grapeshot.halfnes.mappers;
 
-import com.grapeshot.halfnes.audio.*;
-import com.grapeshot.halfnes.utils;
 import java.util.Arrays;
+
+import com.grapeshot.halfnes.utils;
+import com.grapeshot.halfnes.audio.Namco163SoundChip;
 
 /**
  *
@@ -36,11 +37,11 @@ public class NamcoMapper extends Mapper {
 	}
 
 	@Override
-	public int cartRead(final int addr) {
+	public int read(final int addr) {
 		if (addr >= 0x4800 && addr < 0x5000) {
 			//read sound ram
 			if (!hasInitSound) {
-				cpuram.apu.addExpnSound((ExpansionSoundChip) sound);
+				cpuram.apu.addExpansionSoundChip(sound);
 				hasInitSound = true;
 			}
 			int retval = sound.read(soundAddr);
@@ -63,15 +64,16 @@ public class NamcoMapper extends Mapper {
 		return addr >> 8; //open bus
 	}
 
-	public final void cartWrite(final int addr, final int data) {
+	@Override
+	public final void write(final int addr, final int data) {
 		if (addr < 0x4800 || ((addr >= 0x6000) && (addr < 0x8000)) || addr > 0xffff) {
 			//need to add WRAM protection here
-			super.cartWrite(addr, data);
+			super.write(addr, data);
 			return;
 		} else if (addr <= 0x4fff) {
 			//write to sound chip
 			if (!hasInitSound) {
-				cpuram.apu.addExpnSound((ExpansionSoundChip) sound);
+				cpuram.apu.addExpansionSoundChip(sound);
 				hasInitSound = true;
 			}
 			sound.write(soundAddr, data);
@@ -84,7 +86,7 @@ public class NamcoMapper extends Mapper {
 			irqcounter |= data;
 			irqack();
 		} else if (addr <= 0x5fff) {
-			//irq counter high 7 bits		   
+			//irq counter high 7 bits
 			irqcounter &= 0xff;
 			irqcounter |= ((data & 0x7f) << 8);
 			irqenable = ((data & (utils.BIT7)) != 0);

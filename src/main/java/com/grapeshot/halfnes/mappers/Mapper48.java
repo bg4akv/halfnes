@@ -34,9 +34,9 @@ public class Mapper48 extends Mapper {
 	}
 
 	@Override
-	public final void cartWrite(final int addr, final int data) {
+	public final void write(final int addr, final int data) {
 		if (addr < 0x8000 || addr > 0xFFFF) {
-			super.cartWrite(addr, data);
+			super.write(addr, data);
 			return;
 		} else if (addr <= 0x9FFF) {
 			switch (addr & 3) {

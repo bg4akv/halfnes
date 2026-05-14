@@ -11,7 +11,7 @@ import com.grapeshot.halfnes.utils;
  * @author Andrew
  */
 public class VRC6SoundChip implements ExpansionSoundChip {
-	//to access sound test in Castlevania 3(J) - 
+	//to access sound test in Castlevania 3(J) -
 	//Hold down A+B while resetting, push Start twice
 
 	private final Timer[] timers = {new SquareTimer(16), new SquareTimer(16)};
@@ -24,7 +24,8 @@ public class VRC6SoundChip implements ExpansionSoundChip {
 	private boolean clocknow = false;
 
 	@Override
-	public final void write(final int register, final int data) {
+	public final void write(final int register, final int data)
+	{
 		switch (register) {
 			case 0x9000:
 				volume[0] = data & 0xf;

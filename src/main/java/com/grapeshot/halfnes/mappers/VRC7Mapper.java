@@ -32,9 +32,9 @@ public class VRC7Mapper extends Mapper {
 	}
 
 	@Override
-	public final void cartWrite(final int addr, final int data) {
+	public final void write(final int addr, final int data) {
 		if (addr < 0x8000 || addr > 0xffff) {
-			super.cartWrite(addr, data);
+			super.write(addr, data);
 			return;
 		}
 
@@ -60,7 +60,7 @@ public class VRC7Mapper extends Mapper {
 					if (!hasInitSound) {
 						//tiny hack, because the APU is not initialized until AFTER this happens
 						//TODO: this really should not need to be here.
-						cpuram.apu.addExpnSound(sndchip);
+						cpuram.apu.addExpansionSoundChip(sndchip);
 						hasInitSound = true;
 					}
 					sndchip.write(regaddr, data);

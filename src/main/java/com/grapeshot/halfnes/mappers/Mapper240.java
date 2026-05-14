@@ -17,9 +17,9 @@ public class Mapper240 extends Mapper {
 	}
 
 	@Override
-	public final void cartWrite(final int addr, final int data) {
+	public final void write(final int addr, final int data) {
 		if (addr < 0x4020 || addr > 0x5fff) {
-			super.cartWrite(addr, data);
+			super.write(addr, data);
 			return;
 		}
 		int prgselect = (data >> 4) & 0xF;

@@ -46,9 +46,9 @@ public class TengenRamboMapper extends Mapper {
 	}
 
 	@Override
-	public final void cartWrite(int addr, int data) {
+	public final void write(int addr, int data) {
 		if (addr < 0x8000 || addr > 0xffff) {
-			super.cartWrite(addr, data);
+			super.write(addr, data);
 			return;
 		}
 		//bankswitches here

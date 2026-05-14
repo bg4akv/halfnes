@@ -36,9 +36,9 @@ public class AfterburnerMapper extends Mapper {
 	}
 
 	@Override
-	public final void cartWrite(int addr, int data) {
+	public final void write(int addr, int data) {
 		if (addr < 0x8000 || addr > 0xffff) {
-			super.cartWrite(addr, data);
+			super.write(addr, data);
 			return;
 		} else if (addr <= 0x8fff) {
 			setppubank(2, 0, data);

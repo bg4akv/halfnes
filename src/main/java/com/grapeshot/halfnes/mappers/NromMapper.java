@@ -27,7 +27,7 @@ public class NromMapper extends Mapper {
 	}
 
 	@Override
-	public int cartRead(final int addr) {
+	public int read(final int addr) {
 		if (addr >= 0x8000) {
 			return prg[addr];
 		} else if (addr >= 0x6000 && hasprgram) {

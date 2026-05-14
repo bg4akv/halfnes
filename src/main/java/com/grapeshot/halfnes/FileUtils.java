@@ -5,7 +5,10 @@
 package com.grapeshot.halfnes;
 
 import java.awt.EventQueue;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 
 /**
@@ -116,8 +119,8 @@ public class FileUtils {
 	{
 		File file = new File(path);
 		if (!file.exists()
-				|| !file.canRead()
-				|| file.isDirectory()) {
+			|| !file.canRead()
+			|| file.isDirectory()) {
 			return null;
 		}
 
@@ -144,7 +147,7 @@ public class FileUtils {
 
 		int[] ints = new int[bytes.length];
 		for (int i = 0; i < bytes.length; i++) {
-			ints[i] = (short) (bytes[i] & 0xFF);
+			ints[i] = bytes[i] & 0xFF;
 		}
 
 		return ints;

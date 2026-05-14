@@ -18,13 +18,13 @@ public class Mapper61 extends Mapper {
 
 	@Override
 	public void reset() {
-		cartWrite(0x8000, cartRead(0x8000));
+		write(0x8000, read(0x8000));
 	}
 
 	@Override
-	public final void cartWrite(final int addr, final int data) {
+	public final void write(final int addr, final int data) {
 		if (addr < 0x8000 || addr > 0xffff) {
-			super.cartWrite(addr, data);
+			super.write(addr, data);
 			return;
 		}
 

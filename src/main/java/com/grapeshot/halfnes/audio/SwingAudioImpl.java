@@ -27,20 +27,21 @@ public class SwingAudioImpl implements AudioOutInterface {
 		soundEnable = PrefsSingleton.getInstance().getBoolean("soundEnable", true);
 		outputVol = (float) (PrefsSingleton.getInstance().getInt("outputvol", 13107) / 16384.);
 
+		if (!soundEnable) {
+			return;
+		}
+
 		double fps;
 		switch (tvtype) {
-		case NTSC:
-		default:
-			fps = 60.;
-			break;
 		case PAL:
 		case DENDY:
 			fps = 50.;
 			break;
-		}
 
-		if (!soundEnable) {
-			return;
+		case NTSC:
+		default:
+			fps = 60.;
+			break;
 		}
 
 		int samplesPerFrame = (int) Math.ceil((sampleRate * 2) / fps);

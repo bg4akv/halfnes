@@ -9,9 +9,10 @@ import java.io.File;
 import javafx.application.Platform;
 
 import com.grapeshot.halfnes.cheats.ActionReplay;
+import com.grapeshot.halfnes.device.APU;
+import com.grapeshot.halfnes.device.PPU;
 import com.grapeshot.halfnes.mappers.BadMapperException;
 import com.grapeshot.halfnes.mappers.Mapper;
-import com.grapeshot.halfnes.ppu.PPU;
 import com.grapeshot.halfnes.ui.ControllerKeyListener;
 import com.grapeshot.halfnes.ui.FrameLimiter;
 import com.grapeshot.halfnes.ui.MainForm;
@@ -45,22 +46,25 @@ public class NES {
 	public NES(final MainForm mainForm)
 	{
 		this.mainForm = mainForm;
-		loop = new ThreadLoop(() -> {
-			if (runEmulation) {
-				frameStartTime = System.nanoTime();
-				actionReplay.applyPatches();
-				runFrame();
-				if (frameLimiterOn && needSleep) {
-					limiter.sleep();
+		loop = new ThreadLoop(
+			() -> {
+				if (runEmulation) {
+					frameStartTime = System.nanoTime();
+					actionReplay.applyPatches();
+					runFrame();
+					if (frameLimiterOn && needSleep) {
+						limiter.sleep();
+					}
+					frameDoneTime = System.nanoTime() - frameStartTime;
+				} else {
+					limiter.sleepFixed();
+					if (ppu != null && frameCount > 1) {
+						//mainForm.drawImage();
+					}
 				}
-				frameDoneTime = System.nanoTime() - frameStartTime;
-			} else {
-				limiter.sleepFixed();
-				if (ppu != null && frameCount > 1) {
-					//mainForm.drawImage();
-				}
-			}
-		}, 0);
+			},
+			0
+		);
 	}
 
 	public CPUAddrSpace getCPURAM()

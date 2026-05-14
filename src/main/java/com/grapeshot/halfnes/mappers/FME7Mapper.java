@@ -45,7 +45,7 @@ public class FME7Mapper extends Mapper {
 	}
 
 	@Override
-	public final int cartRead(int addr) {
+	public final int read(int addr) {
 		//five possible rom banks.
 		if (addr >= 0x6000) {
 			if (addr < 0x8000 && ramSelect) {
@@ -61,9 +61,9 @@ public class FME7Mapper extends Mapper {
 	}
 
 	@Override
-	public final void cartWrite(final int addr, final int data) {
+	public final void write(final int addr, final int data) {
 		if (addr < 0x8000 || addr > 0xffff) {
-			super.cartWrite(addr, data);
+			super.write(addr, data);
 			return;
 		}
 		if (addr == 0x8000) {
@@ -74,7 +74,7 @@ public class FME7Mapper extends Mapper {
 			soundCommand = data & 0xf;
 			if (!hasInitSound) {
 				//only initialize the sound chip if anything writes a sound command.
-				cpuram.apu.addExpnSound(sndchip);
+				cpuram.apu.addExpansionSoundChip(sndchip);
 				hasInitSound = true;
 			}
 		} else if (addr == 0xa000) {

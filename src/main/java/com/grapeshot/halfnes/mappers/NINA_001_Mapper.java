@@ -17,9 +17,9 @@ public class NINA_001_Mapper extends Mapper {
 	}
 
 	@Override
-	public final void cartWrite(final int addr, final int data) {
+	public final void write(final int addr, final int data) {
 		if (addr < 0x7ffd || addr > 0x7fff) {
-			super.cartWrite(addr, data);
+			super.write(addr, data);
 			return;
 		}
 

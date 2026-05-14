@@ -27,9 +27,9 @@ public class OscilloScope implements AudioOutInterface {
 	private int prevSample = 0;
 
 
-	public OscilloScope(AudioOutInterface i)
+	public OscilloScope(AudioOutInterface iface)
 	{
-		this.iface = i;
+		this.iface = iface;
 		debugUI = new DebugUI(length, width);
 		image = new BufferedImage(length, width, BufferedImage.TYPE_INT_ARGB_PRE);
 

@@ -22,7 +22,7 @@ public class Sunsoft01Mapper extends Mapper {
 	}
 
 	@Override
-	public final void cartWrite(int addr, int data) {
+	public final void write(int addr, int data) {
 		if (addr >= 0x6000 && addr < 0x8000) {
 			lowBank = data & 7;
 			highBank = (data >> 4) & 7;

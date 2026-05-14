@@ -34,14 +34,14 @@ public class NINA_003_006_Mapper extends Mapper {
 	@Override
 	public final void reset() {
 		for (int i = 0x4100; i < 0x6000; i += 0x200) {
-			cartWrite(i, i + 0xFF);
+			write(i, i + 0xFF);
 		}
 	}
 
 	@Override
-	public final void cartWrite(final int addr, final int data) {
+	public final void write(final int addr, final int data) {
 		if (addr < 0x4100 || addr > 0x5fff) {
-			super.cartWrite(addr, data);
+			super.write(addr, data);
 			return;
 		}
 

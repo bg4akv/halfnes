@@ -13,10 +13,11 @@ import com.grapeshot.halfnes.CPUAddrSpace;
 import com.grapeshot.halfnes.PrefsSingleton;
 import com.grapeshot.halfnes.ROMLoader;
 import com.grapeshot.halfnes.utils;
-import com.grapeshot.halfnes.ppu.PPU;
+import com.grapeshot.halfnes.device.NESDev;
+import com.grapeshot.halfnes.device.PPU;
 
 
-public abstract class Mapper {
+public abstract class Mapper extends NESDev {
 	private static final CRC32 crc32 = new CRC32();
 	protected ROMLoader loader;
 	protected int mappertype, submapper, prgsize, prgoff, chroff, chrsize;
@@ -51,7 +52,6 @@ public abstract class Mapper {
 	}
 
 	public static enum MirrorType {
-
 		H_MIRROR, V_MIRROR, SS_MIRROR0, SS_MIRROR1, FOUR_SCREEN_MIRROR
 	};
 
@@ -59,6 +59,35 @@ public abstract class Mapper {
 		NTSC,
 		PAL,
 		DENDY;
+	}
+
+	public enum MapperType {
+		INVALID(-1), MODE_0(0), MODE_1(1), MODE_2(2), MODE_3(3),
+		MODE_4(4), MODE_5(5), MODE_6(6),MODE_7(7), MODE_8(8),
+		MODE_9(9), MODE_10(10);
+
+		private final int value;
+
+		private MapperType(int value)
+		{
+			this.value = value;
+		}
+
+		public int value()
+		{
+			return value;
+		}
+
+		public static MapperType valueOf(int value)
+		{
+			return Arrays.stream(values()).filter((e) -> e.value() == value).findFirst().orElse(INVALID);
+		}
+
+		@Override
+		public String toString()
+		{
+			return super.toString() + String.format("(%d)", value);
+		}
 	}
 
 	public static long crc32(int[] array)
@@ -121,7 +150,8 @@ public abstract class Mapper {
 	}
 
 	//write into the cartridge's address space
-	public void cartWrite(final int addr, final int data)
+	@Override
+	public void write(final int addr, final int data)
 	{
 		//default no-mapper operation just writes if in PRG RAM range
 		if (addr >= 0x6000 && addr < 0x8000) {
@@ -129,7 +159,8 @@ public abstract class Mapper {
 		}
 	}
 
-	public int cartRead(final int addr)
+	@Override
+	public int read(final int addr)
 	{
 		// by default has wram at 0x6000 and cartridge at 0x8000-0xfff
 		// but some mappers have different so override for those

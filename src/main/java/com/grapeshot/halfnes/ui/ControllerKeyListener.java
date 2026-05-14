@@ -39,23 +39,23 @@ import com.grapeshot.halfnes.util.ThreadLoop;
  * (cf. http://java.net/projects/jinput).
  */
 public class ControllerKeyListener implements KeyListener {
-	public static final String KEY_CTRL1_KEYUP = "controller1.keyUp";
-	public static final String KEY_CTRL1_KEYDN = "controller1.keyDown";
-	public static final String KEY_CTRL1_KEYLF = "controller1.keyLeft";
-	public static final String KEY_CTRL1_KEYRT = "controller1.keyRight";
-	public static final String KEY_CTRL1_KEYA = "controller1.keyA";
-	public static final String KEY_CTRL1_KEYB = "controller1.keyB";
-	public static final String KEY_CTRL1_KEYSL = "controller1.keySelect";
-	public static final String KEY_CTRL1_KEYST = "controller1.keyStart";
+	public static final String CTRL1_KEY_UP = "controller1.keyUp";
+	public static final String CTRL1_KEY_DN = "controller1.keyDown";
+	public static final String CTRL1_KEY_LF = "controller1.keyLeft";
+	public static final String CTRL1_KEY_RT = "controller1.keyRight";
+	public static final String CTRL1_KEY_A = "controller1.keyA";
+	public static final String CTRL1_KEY_B = "controller1.keyB";
+	public static final String CTRL1_KEY_SL = "controller1.keySelect";
+	public static final String CTRL1_KEY_ST = "controller1.keyStart";
 
-	public static final String KEY_CTRL2_KEYUP = "controller2.keyUp";
-	public static final String KEY_CTRL2_KEYDN = "controller2.keyDown";
-	public static final String KEY_CTRL2_KEYLF = "controller2.keyLeft";
-	public static final String KEY_CTRL2_KEYRT = "controller2.keyRight";
-	public static final String KEY_CTRL2_KEYA = "controller2.keyA";
-	public static final String KEY_CTRL2_KEYB = "controller2.keyB";
-	public static final String KEY_CTRL2_KEYSL = "controller2.keySelect";
-	public static final String KEY_CTRL2_KEYST = "controller2.keyStart";
+	public static final String CTRL2_KEY_UP = "controller2.keyUp";
+	public static final String CTRL2_KEY_DN = "controller2.keyDown";
+	public static final String CTRL2_KEY_LF = "controller2.keyLeft";
+	public static final String CTRL2_KEY_RT = "controller2.keyRight";
+	public static final String CTRL2_KEY_A = "controller2.keyA";
+	public static final String CTRL2_KEY_B = "controller2.keyB";
+	public static final String CTRL2_KEY_SL = "controller2.keySelect";
+	public static final String CTRL2_KEY_ST = "controller2.keyStart";
 
 
 	private final Preferences prefs = PrefsSingleton.getInstance();
@@ -67,23 +67,23 @@ public class ControllerKeyListener implements KeyListener {
 	private final ThreadLoop loop;
 
 	public static final Map<String, Pair<Integer, Integer>> keyMap = new HashMap<String, Pair<Integer, Integer>>() {{
-		put(KEY_CTRL1_KEYA, new Pair<Integer, Integer>(KeyEvent.VK_X, BIT0));
-		put(KEY_CTRL1_KEYB, new Pair<Integer, Integer>(KeyEvent.VK_Z, BIT1));
-		put(KEY_CTRL1_KEYSL, new Pair<Integer, Integer>(KeyEvent.VK_SHIFT, BIT2));
-		put(KEY_CTRL1_KEYST, new Pair<Integer, Integer>(KeyEvent.VK_ENTER, BIT3));
-		put(KEY_CTRL1_KEYUP, new Pair<Integer, Integer>(KeyEvent.VK_UP, BIT4));
-		put(KEY_CTRL1_KEYDN, new Pair<Integer, Integer>(KeyEvent.VK_DOWN, BIT5));
-		put(KEY_CTRL1_KEYLF, new Pair<Integer, Integer>(KeyEvent.VK_LEFT, BIT6));
-		put(KEY_CTRL1_KEYRT, new Pair<Integer, Integer>(KeyEvent.VK_RIGHT, BIT7));
+		put(CTRL1_KEY_A, new Pair<Integer, Integer>(KeyEvent.VK_X, BIT0));
+		put(CTRL1_KEY_B, new Pair<Integer, Integer>(KeyEvent.VK_Z, BIT1));
+		put(CTRL1_KEY_SL, new Pair<Integer, Integer>(KeyEvent.VK_SHIFT, BIT2));
+		put(CTRL1_KEY_ST, new Pair<Integer, Integer>(KeyEvent.VK_ENTER, BIT3));
+		put(CTRL1_KEY_UP, new Pair<Integer, Integer>(KeyEvent.VK_UP, BIT4));
+		put(CTRL1_KEY_DN, new Pair<Integer, Integer>(KeyEvent.VK_DOWN, BIT5));
+		put(CTRL1_KEY_LF, new Pair<Integer, Integer>(KeyEvent.VK_LEFT, BIT6));
+		put(CTRL1_KEY_RT, new Pair<Integer, Integer>(KeyEvent.VK_RIGHT, BIT7));
 
-		put(KEY_CTRL2_KEYA, new Pair<Integer, Integer>(KeyEvent.VK_G, BIT0));
-		put(KEY_CTRL2_KEYB, new Pair<Integer, Integer>(KeyEvent.VK_F, BIT1));
-		put(KEY_CTRL2_KEYSL, new Pair<Integer, Integer>(KeyEvent.VK_R, BIT2));
-		put(KEY_CTRL2_KEYST, new Pair<Integer, Integer>(KeyEvent.VK_T, BIT3));
-		put(KEY_CTRL2_KEYUP, new Pair<Integer, Integer>(KeyEvent.VK_W, BIT4));
-		put(KEY_CTRL2_KEYDN, new Pair<Integer, Integer>(KeyEvent.VK_S, BIT5));
-		put(KEY_CTRL2_KEYLF, new Pair<Integer, Integer>(KeyEvent.VK_A, BIT6));
-		put(KEY_CTRL2_KEYRT, new Pair<Integer, Integer>(KeyEvent.VK_D, BIT7));
+		put(CTRL2_KEY_A, new Pair<Integer, Integer>(KeyEvent.VK_G, BIT0));
+		put(CTRL2_KEY_B, new Pair<Integer, Integer>(KeyEvent.VK_F, BIT1));
+		put(CTRL2_KEY_SL, new Pair<Integer, Integer>(KeyEvent.VK_R, BIT2));
+		put(CTRL2_KEY_ST, new Pair<Integer, Integer>(KeyEvent.VK_T, BIT3));
+		put(CTRL2_KEY_UP, new Pair<Integer, Integer>(KeyEvent.VK_W, BIT4));
+		put(CTRL2_KEY_DN, new Pair<Integer, Integer>(KeyEvent.VK_S, BIT5));
+		put(CTRL2_KEY_LF, new Pair<Integer, Integer>(KeyEvent.VK_A, BIT6));
+		put(CTRL2_KEY_RT, new Pair<Integer, Integer>(KeyEvent.VK_D, BIT7));
 	}};
 
 	public ControllerKeyListener(final Scene scene, final int controllernum)

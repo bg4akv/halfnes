@@ -25,7 +25,7 @@ public class Mapper87 extends Mapper {
 	}
 
 	@Override
-	public final void cartWrite(final int addr, final int data) {
+	public final void write(final int addr, final int data) {
 		if (addr >= 0x6000 && addr < 0x8000) {
 			//remap CHR bank
 			int bit0 = (data >> 1) & 1;
@@ -34,7 +34,7 @@ public class Mapper87 extends Mapper {
 				chr_map[i] = (1024 * (i + 8 * ((bit1 << 1) + bit0))) & (chrsize - 1);
 			}
 		} else {
-			super.cartWrite(addr, data);
+			super.write(addr, data);
 		}
 	}
 }
