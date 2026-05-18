@@ -79,20 +79,114 @@ public class APU extends NESDev {
 	public int sprdma_count;
 	private int apuCycle = 0;
 	private int remainder = 0;
-	private int[] noiseperiod;
+
 	// different for PAL
 	private long accum = 0;
 	private final List<ExpansionSoundChip> expansionSoundChips = new ArrayList<>();
 	private boolean soundFiltering;
 
-	private int framectrreload;
-	private int framectrdiv = 7456;
 	private int dckiller = -6392; //removes icky power on thump
 	private int lpaccum = 0;
 
 
 	private int cyclesPerFrame;
 	private AudioOutInterface audioOutput;
+
+
+	private static class Status {
+		private boolean enabled = false;
+		private boolean occurred = false;
+
+		public void setEnabled(boolean enabled)
+		{
+			this.enabled = enabled;
+		}
+
+		public boolean isEnabled()
+		{
+			return enabled;
+		}
+
+		public void setOccurred(boolean occurred)
+		{
+			this.occurred = occurred;
+		}
+
+		public boolean isOccurred()
+		{
+			return occurred;
+		}
+	}
+
+	private static enum SequMode {
+		SEQU_4_STEP, SEQU_5_STEP;
+	}
+
+	private static class FrameCounter {
+		public SequMode sequMode;
+		public int step = 0;
+		public int load = 0;
+		public int div = 7456;
+		public final Status interruptStatus = new Status();
+
+
+		public void nextStep()
+		{
+			step++;
+			step %= (sequMode == SequMode.SEQU_4_STEP)? 4 : 5;
+		}
+
+		public void countDown()
+		{
+			if (--div <= 0) {
+				div = load;
+				//clockFrameCounter();
+			}
+		}
+	}
+
+	private final FrameCounter frameCounter = new FrameCounter();
+
+	private static class DMCSample {
+		public int byteLength = 1;
+		public int byteLeft = 0;
+		public int startAddr = 0xc000;
+		public int addr = 0xc000;
+
+		public boolean silence = true;
+
+		public void restart()
+		{
+			addr = startAddr;
+			byteLeft = byteLength;
+			silence = false;
+		}
+	}
+
+	private static class DMC {
+		public int[] rates;
+
+		public int rate = 0x36;
+		public boolean loop = false;
+		public int outputLevel = 0;
+
+		public final DMCSample sample = new DMCSample();
+
+		public int pos = 0;
+		public int shiftRegister = 0;
+		public int buffer = 0;
+
+		public int bitsLeft = Byte.SIZE;
+
+
+
+		public boolean bufferEmpty = true;
+
+		public final Status interruptStatus = new Status();
+
+	}
+
+	private final DMC dmc = new DMC();
 
 
 	private static class LengthCounter {
@@ -158,85 +252,6 @@ public class APU extends NESDev {
 			}
 		}
 	}
-
-	private static class Status {
-		private boolean enabled = false;
-		private boolean occurred = false;
-
-		public void setEnabled(boolean enabled)
-		{
-			this.enabled = enabled;
-		}
-
-		public boolean isEnabled()
-		{
-			return enabled;
-		}
-
-		public void setOccurred(boolean occurred)
-		{
-			this.occurred = occurred;
-		}
-
-		public boolean isOccurred()
-		{
-			return occurred;
-		}
-	}
-
-	private static enum SequMode {
-		SEQU_4_STEP, SEQU_5_STEP;
-	}
-
-	private static class FrameCounter {
-		public SequMode sequMode;
-		public int value = 0;
-		public final Status interruptStatus = new Status();
-	}
-
-	private final FrameCounter frameCounter = new FrameCounter();
-
-	private static class DMCSample {
-		public int byteLength = 1;
-		public int byteLeft = 0;
-		public int startAddr = 0xc000;
-		public int addr = 0xc000;
-
-		public boolean silence = true;
-
-		public void restart()
-		{
-			addr = startAddr;
-			byteLeft = byteLength;
-			silence = false;
-		}
-	}
-
-	private static class DMC {
-		public int[] rates;
-
-		public int rate = 0x36;
-		public boolean loop = false;
-		public int outputLevel = 0;
-
-		public final DMCSample sample = new DMCSample();
-
-		public int pos = 0;
-		public int shiftRegister = 0;
-		public int buffer = 0;
-
-		public int bitsLeft = Byte.SIZE;
-
-
-
-		public boolean bufferEmpty = true;
-
-		public final Status interruptStatus = new Status();
-
-	}
-
-	private final DMC dmc = new DMC();
-
 
 	private static class LinearCounter {
 		public boolean controlFlag = true;
@@ -396,10 +411,24 @@ public class APU extends NESDev {
 	}
 
 	private static class Noise extends Channel {
+		private int[] period;
 
 		public Noise()
 		{
 			super(new NoiseTimer());
+		}
+
+		public void setPeriods(int[] period)
+		{
+			this.period = period;
+		}
+
+		public int getPeriod(int index)
+		{
+			return (period != null
+					&& index >= 0
+					&& index < period.length)?
+				period[index] : 0;
 		}
 	}
 
@@ -457,24 +486,24 @@ public class APU extends NESDev {
 		case NTSC:
 		default:
 			this.dmc.rates = DMC_RATES_NTSC;
-			this.noiseperiod = new int[] {4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068};
-			this.framectrreload = 7456;
+			noise.setPeriods(new int[] {4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068});
+			this.frameCounter.load = 7456;
 			cyclesPerSample = 1789773.0 / sampleRate;
 			cyclesPerFrame = 29781;
 			break;
 
 		case DENDY:
 			this.dmc.rates = DMC_RATES_DENDY;
-			this.noiseperiod = new int[] {4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068};
-			this.framectrreload = 7456;
+			noise.setPeriods(new int[] {4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068});
+			this.frameCounter.load = 7456;
 			cyclesPerSample = 1773448.0 / sampleRate;
 			cyclesPerFrame = 35469;
 			break;
 		case PAL:
 			cyclesPerSample = 1662607.0 / sampleRate;
 			this.dmc.rates = DMC_RATES_PAL;
-			this.noiseperiod = new int[] {4, 8, 14, 30, 60, 88, 118, 148, 188, 236, 354, 472, 708, 944, 1890, 3778};
-			this.framectrreload = 8312;
+			noise.setPeriods(new int[] {4, 8, 14, 30, 60, 88, 118, 148, 188, 236, 354, 472, 708, 944, 1890, 3778});
+			this.frameCounter.load = 8312;
 			cyclesPerFrame = 33252;
 			break;
 		}
@@ -658,7 +687,7 @@ public class APU extends NESDev {
 
 		case REG_NOISE_LO:
 			noise.timer.setDuty(((data & utils.BIT7) != 0)? 6 : 1);
-			noise.timer.setPeriod(noiseperiod[data & 0x0f]);
+			noise.timer.setPeriod(noise.getPeriod(data & 0x0f));
 			break;
 
 		case REG_NOISE_HI:
@@ -748,9 +777,9 @@ public class APU extends NESDev {
 			frameCounter.interruptStatus.setEnabled((data & utils.BIT6) == 0);
 			//set is no interrupt, clear is an interrupt
 
-			frameCounter.value = 0;
+			frameCounter.step = 0;
 
-			framectrdiv = framectrreload + 8; //Why +8?
+			frameCounter.div = frameCounter.load + 8; //Why +8?
 			if (!frameCounter.interruptStatus.isEnabled()
 				&& frameCounter.interruptStatus.isOccurred()) {
 				frameCounter.interruptStatus.setOccurred(false);
@@ -773,7 +802,7 @@ public class APU extends NESDev {
 		}
 	}
 
-	public final void updateto(final int cpucycle)
+	private final void updateto(final int cpucycle)
 	{
 		//still have to run this even if sound is disabled, some games rely on DMC IRQ etc.
 		if (soundFiltering) {
@@ -785,8 +814,8 @@ public class APU extends NESDev {
 			while (apuCycle < cpucycle) {
 				++remainder;
 				clockDMC();
-				if (--framectrdiv <= 0) {
-					framectrdiv = framectrreload;
+				if (--frameCounter.div <= 0) {
+					frameCounter.div = frameCounter.load;
 					clockFrameCounter();
 				}
 				pulses[0].timer.clock();
@@ -816,8 +845,8 @@ public class APU extends NESDev {
 			while (apuCycle < cpucycle) {
 				++remainder;
 				clockDMC();
-				if (--framectrdiv <= 0) {
-					framectrdiv = framectrreload;
+				if (--frameCounter.div <= 0) {
+					frameCounter.div = frameCounter.load;
 					clockFrameCounter();
 				}
 				if ((apuCycle % cyclesPerSample) < 1) {
@@ -889,6 +918,7 @@ public class APU extends NESDev {
 	private void clockFrameCounter()
 	{
 		//System.err.println("frame ctr clock " + framectr + ' ' + cpu.cycles);
+
 		//should be ~4x a frame, 240 Hz
 		//but the problem is this isn't exactly related to the video signal,
 		//it's a completely separate timer, so the phase can shift in relation to the
@@ -896,19 +926,19 @@ public class APU extends NESDev {
 		//an APU register is written/read from, or @ end of frame. So both of those need work
 
 		if (frameCounter.sequMode == SequMode.SEQU_4_STEP
-			|| (frameCounter.sequMode == SequMode.SEQU_5_STEP && frameCounter.value != 3)) {
+			|| (frameCounter.sequMode == SequMode.SEQU_5_STEP && frameCounter.step != 3)) {
 			refreshEnvelopes();
 			triangle.refreshLinearCounter();
 		}
 
-		if ((frameCounter.sequMode == SequMode.SEQU_4_STEP && (frameCounter.value == 1 || frameCounter.value == 3))
-				|| (frameCounter.sequMode == SequMode.SEQU_5_STEP && (frameCounter.value == 1 || frameCounter.value == 4))) {
+		if ((frameCounter.sequMode == SequMode.SEQU_4_STEP && (frameCounter.step == 1 || frameCounter.step == 3))
+			|| (frameCounter.sequMode == SequMode.SEQU_5_STEP && (frameCounter.step == 1 || frameCounter.step == 4))) {
 			refreshLengthCounters();
 			refreshSweeps();
 		}
 
 		if ((frameCounter.sequMode == SequMode.SEQU_4_STEP)
-			&& (frameCounter.value == 3)
+			&& (frameCounter.step == 3)
 			&& frameCounter.interruptStatus.isEnabled()
 			&& !frameCounter.interruptStatus.isOccurred()) {
 
@@ -916,14 +946,9 @@ public class APU extends NESDev {
 			cpu.interrupt++;
 		}
 
-		frameCounter.value++;
-		frameCounter.value %= (frameCounter.sequMode == SequMode.SEQU_4_STEP)? 4 : 5;
-
+		frameCounter.nextStep();
 		refreshVolumes();
 	}
-
-
-
 
 
 

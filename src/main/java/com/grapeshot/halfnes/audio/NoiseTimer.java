@@ -69,7 +69,8 @@ public class NoiseTimer extends Timer {
 		period = newperiod;
 	}
 
-	public static int[] genvalues(int whichbit, int seed) {
+	public static int[] genvalues(int whichbit, int seed)
+	{
 		int[] tehsuck = new int[(whichbit == 1) ? 32767 : 93];
 		for (int i = 0; i < tehsuck.length; ++i) {
 			seed = (seed >> 1)
